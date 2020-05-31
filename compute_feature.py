@@ -180,7 +180,7 @@ def get_halluc_lane(centerlane, city_name):
     return halluc_lane_1, halluc_lane_2
 
 
-def get_nearby_lane_feature_ls(agent_df, obs_len, city_name, lane_radius, norm_center, has_attr=False, mode='nearby', **kwargs):
+def get_nearby_lane_feature_ls(am, agent_df, obs_len, city_name, lane_radius, norm_center, has_attr=False, mode='nearby', **kwargs):
     '''
     compute lane features
     args:
@@ -324,8 +324,8 @@ def compute_feature_for_one_seq(traj_df: pd.DataFrame, am: ArgoverseMap, obs_len
 
     # search nearby lane from the last observed point of agent
     # [!polygon_ls]
-    lane_feature_ls = get_nearby_lane_feature_ls(
-        agent_df, obs_len, city_name, lane_radius, norm_center)
+    lane_feature_ls = get_nearby_lane_feature_ls(am,
+                                                 agent_df, obs_len, city_name, lane_radius, norm_center)
 
     # search nearby moving objects from the last observed point of agent
     obj_feature_ls = get_nearby_moving_obj_feature_ls(
