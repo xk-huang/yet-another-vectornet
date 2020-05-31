@@ -177,35 +177,46 @@ def get_halluc_lane(centerlane, city_name):
         # print(halluc_lane_1, )
         halluc_lane_1 = np.vstack((halluc_lane_1, lane_1))
         halluc_lane_2 = np.vstack((halluc_lane_2, lane_2))
-
     return halluc_lane_1, halluc_lane_2
 
 
-def get_nearby_lane_feature_ls(agent_df, obs_len, city_name, lane_radius, has_attr=False):
+def get_nearby_lane_feature_ls(agent_df, obs_len, city_name, lane_radius, norm_center, has_attr=False, mode='nearby', **kwargs):
     '''
     compute lane features
     args:
+        norm_center: np.ndarray
+        mode: 'nearby' return nearby lanes within the radius; 'rect' return lanes within the query bbox
     returns:
         list of list of lane a segment feature, formatted in [left_lane, right_lane, is_traffic_control, is_intersection, lane_id]
     '''
+
     lane_feature_ls = []
-    query_x, query_y = agent_df[['X', 'Y']].values[obs_len-1]
-    nearby_lane_ids = am.get_lane_ids_in_xy_bbox(
-        query_x, query_y, city_name, lane_radius)
+    if mode == 'nearby':
+        query_x, query_y = agent_df[['X', 'Y']].values[obs_len-1]
+        nearby_lane_ids = am.get_lane_ids_in_xy_bbox(
+            query_x, query_y, city_name, lane_radius)
 
-    for lane_id in nearby_lane_ids:
-        traffic_control = am.lane_has_traffic_control_measure(
-            lane_id, city_name)
-        is_intersection = am.lane_is_in_intersection(lane_id, city_name)
+        for lane_id in nearby_lane_ids:
+            traffic_control = am.lane_has_traffic_control_measure(
+                lane_id, city_name)
+            is_intersection = am.lane_is_in_intersection(lane_id, city_name)
 
-        centerlane = am.get_lane_segment_centerline(lane_id, city_name)
-        halluc_lane_1, halluc_lane_2 = get_halluc_lane(centerlane, city_name)
+            centerlane = am.get_lane_segment_centerline(lane_id, city_name)
+            # normalize to last observed timestamp point of agent
+            centerlane[:, :2] -= norm_center
+            halluc_lane_1, halluc_lane_2 = get_halluc_lane(
+                centerlane, city_name)
 
-        if has_attr:
-            raise NotImplementedError()
+            if has_attr:
+                raise NotImplementedError()
 
-        lane_feature_ls.append(
-            [halluc_lane_1, halluc_lane_2, traffic_control, is_intersection, lane_id])
+            lane_feature_ls.append(
+                [halluc_lane_1, halluc_lane_2, traffic_control, is_intersection, lane_id])
+    elif mode == 'rect':
+        raise NotImplementedError()
+    else:
+        raise ValueError(f"{mode} is not in {'rect', 'nearby'}")
+
     return lane_feature_ls
     # polygon = am.get_lane_segment_polygon(lane_id, city_name)
     # h_len = polygon.shape[0]
@@ -214,7 +225,7 @@ def get_nearby_lane_feature_ls(agent_df, obs_len, city_name, lane_radius, has_at
     # polygon_ls.append(polygon)
 
 
-def get_nearby_moving_obj_feature_ls(agent_df, traj_df, obs_len, seq_ts):
+def get_nearby_moving_obj_feature_ls(agent_df, traj_df, obs_len, seq_ts, norm_center):
     """
     args:
     returns: list of list, (doubled_track, object_type, timestamp, track_id)
@@ -239,6 +250,7 @@ def get_nearby_moving_obj_feature_ls(agent_df, traj_df, obs_len, seq_ts):
         if np.linalg.norm(p0 - p1) > obj_radius:
             continue
 
+        xys -= norm_center  # normalize to last observed timestamp point of agent
         xys = np.hstack((xys[:-1], xys[1:]))
         ts = remain_df["TIMESTAMP"].values
         ts = (ts[:-1] + ts[1:]) / 2
@@ -248,13 +260,16 @@ def get_nearby_moving_obj_feature_ls(agent_df, traj_df, obs_len, seq_ts):
     return obj_feature_ls
 
 
-def get_agent_feature_ls(agent_df, obs_len):
+def get_agent_feature_ls(agent_df, obs_len, norm_center):
     """
     args:
-    returns: list of (doubeld_track, object_type, timetamp, track_id, not_doubled_groudtruth_feature_trajectory)
+    returns: 
+        list of (doubeld_track, object_type, timetamp, track_id, not_doubled_groudtruth_feature_trajectory)
     """
     xys, gt_xys = agent_df[["X", "Y"]].values[:obs_len], agent_df[[
         "X", "Y"]].values[obs_len:]
+    xys -= norm_center  # normalize to last observed timestamp point of agent
+    gt_xys -= norm_center  # normalize to last observed timestamp point of agent
     xys = np.hstack((xys[:-1], xys[1:]))
 
     ts = agent_df['TIMESTAMP'].values[:obs_len]
@@ -286,8 +301,8 @@ def compute_feature_for_one_seq(traj_df: pd.DataFrame, am: ArgoverseMap, obs_len
     seq_len = seq_ts.shape[0]
     city_name = traj_df['CITY_NAME'].iloc[0]
     agent_df = None
-    agent_x_end, agent_y_end, start_x, start_y, query_x, query_y = [None] * 6
-
+    agent_x_end, agent_y_end, start_x, start_y, query_x, query_y, norm_center = [
+        None] * 7
     # agent traj & its start/end point
     for obj_type, remain_df in traj_df.groupby('OBJECT_TYPE'):
         if obj_type == 'AGENT':
@@ -295,9 +310,10 @@ def compute_feature_for_one_seq(traj_df: pd.DataFrame, am: ArgoverseMap, obs_len
             start_x, start_y = agent_df[['X', 'Y']].values[0]
             agent_x_end, agent_y_end = agent_df[['X', 'Y']].values[-1]
             query_x, query_y = agent_df[['X', 'Y']].values[obs_len-1]
+            norm_center = np.array([query_x, query_y])
             break
         else:
-            raise ValueError()
+            raise ValueError(f"cannot find 'agent' object type")
 
     # prune points after "obs_len" timestamp
     traj_df = traj_df[traj_df['TIMESTAMP'] <
@@ -309,13 +325,13 @@ def compute_feature_for_one_seq(traj_df: pd.DataFrame, am: ArgoverseMap, obs_len
     # search nearby lane from the last observed point of agent
     # [!polygon_ls]
     lane_feature_ls = get_nearby_lane_feature_ls(
-        agent_df, obs_len, city_name, lane_radius)
+        agent_df, obs_len, city_name, lane_radius, norm_center)
 
     # search nearby moving objects from the last observed point of agent
     obj_feature_ls = get_nearby_moving_obj_feature_ls(
-        agent_df, traj_df, obs_len, seq_ts)
+        agent_df, traj_df, obs_len, seq_ts, norm_center)
     # get agent features
-    agent_feature = get_agent_feature_ls(agent_df, obs_len)
+    agent_feature = get_agent_feature_ls(agent_df, obs_len, norm_center)
 
     # vis
     if viz:
@@ -330,13 +346,28 @@ def compute_feature_for_one_seq(traj_df: pd.DataFrame, am: ArgoverseMap, obs_len
         show_traj(np.vstack(
             (agent_feature[0][:, :2], agent_feature[0][-1, 2:])), agent_feature[1])
 
-        plt.plot(agent_x_end, agent_y_end, 'o',
+        plt.plot(agent_x_end - query_x, agent_y_end - query_y, 'o',
                  color=color_dict['AGENT'], markersize=7)
-        plt.plot(query_x, query_y, 'x', color='blue', markersize=4)
-        plt.plot(start_x, start_y, 'x', color='blue', markersize=4)
+        plt.plot(0, 0, 'x', color='blue', markersize=4)
+        plt.plot(start_x-query_x, start_y-query_y,
+                 'x', color='blue', markersize=4)
         plt.show()
 
     return [agent_feature, obj_feature_ls, lane_feature_ls]
+
+
+def trans_gt_offset_format(gt):
+    """
+    >Our predicted trajectories are parameterized as per-stepcoordinate offsets, starting from the last observed location.We rotate the coordinate system based on the heading of the target vehicle at the last observed location.
+    """
+    assert gt.shape == (30, 2), f"{gt.shape} is wrong"
+    offset_gt = np.vstack((gt[0], gt[1:] - gt[:-1]))
+    # import pdb
+    # pdb.set_trace()
+    assert (offset_gt.cumsum(axis=0) -
+            gt).sum() < 1e-6, f"{(offset_gt.cumsum(axis=0) -gt).sum()}"
+
+    return offset_gt
 
 
 def encoding_features(agent_feature, obj_feature_ls, lane_feature_ls):
@@ -350,39 +381,56 @@ def encoding_features(agent_feature, obj_feature_ls, lane_feature_ls):
             list of list of lane a segment feature, formatted in [left_lane, right_lane, is_traffic_control, is_intersection, lane_id]
     returns:
         pd.DataFrame of (
-            traj: (xs, ys, xe, ye, obejct_type, timestamp(avg_for_start_end?), polyline_id),
-            lane: (xs, ys, zs, xe, ye, ze, polyline_id),
-            gt: not_doubled_groudtruth_feature_trajectory,
+            polyline_features: vstack[(xs, ys, xe, ye, obejct_type, timestamp(avg_for_start_end?), (xs, ys, zs, xe, ye, ze, polyline_id)]
+            offset_gt: incremental offset from agent's last obseved point,
+            traj_id2mask: Dict[int, int]
+            lane_id2mask: Dict[int, int]
         )
         where obejct_type = {0 - others, 1 - agent}
 
     """
     polyline_id = 0
+    traj_id2mask, lane_id2mask = {}, {}
     gt = agent_feature[-1]
     traj_nd, lane_nd = np.empty((0, 7)), np.empty((0, 7))
 
+    # encoding agent feature
+    pre_traj_len = traj_nd.shape[0]
     agent_len = agent_feature[0].shape[0]
     # print(agent_feature[0].shape, np.ones(
     # (agent_len, 1)).shape, agent_feature[2].shape, (np.ones((agent_len, 1)) * polyline_id).shape)
     agent_nd = np.hstack((agent_feature[0], np.ones(
         (agent_len, 1)), agent_feature[2].reshape((-1, 1)), np.ones((agent_len, 1)) * polyline_id))
     assert agent_nd.shape[1] == 7, "obj_traj feature dim 1 is not correct"
+
     traj_nd = np.vstack((traj_nd, agent_nd))
+    traj_id2mask[polyline_id] = (pre_traj_len, traj_nd.shape[0])
+    pre_traj_len = traj_nd.shape[0]
     polyline_id += 1
 
+    # encoding obj feature
     for obj_feature in obj_feature_ls:
         obj_len = obj_feature[0].shape[0]
         obj_nd = np.hstack((obj_feature[0], np.zeros(
             (obj_len, 1)), obj_feature[2].reshape((-1, 1)), np.ones((obj_len, 1)) * polyline_id))
         assert obj_nd.shape[1] == 7, "obj_traj feature dim 1 is not correct"
         traj_nd = np.vstack((traj_nd, obj_nd))
+
+        traj_id2mask[polyline_id] = (pre_traj_len, traj_nd.shape[0])
+        pre_traj_len = traj_nd.shape[0]
         polyline_id += 1
 
+    # incodeing lane feature
+    pre_lane_len = lane_nd.shape[0]
     for lane_feature in lane_feature_ls:
         l_lane_len = lane_feature[0].shape[0]
         l_lane_nd = np.hstack(
             (lane_feature[0], np.ones((l_lane_len, 1)) * polyline_id))
         assert l_lane_nd.shape[1] == 7, "obj_traj feature dim 1 is not correct"
+        lane_nd = np.vstack((lane_nd, l_lane_nd))
+        lane_id2mask[polyline_id] = (pre_lane_len, lane_nd.shape[0])
+        _tmp_len_1 = pre_lane_len - lane_nd.shape[0]
+        pre_lane_len = lane_nd.shape[0]
         polyline_id += 1
 
         r_lane_len = lane_feature[1].shape[0]
@@ -390,20 +438,31 @@ def encoding_features(agent_feature, obj_feature_ls, lane_feature_ls):
             (lane_feature[1], np.ones((r_lane_len, 1)) * polyline_id)
         )
         assert r_lane_nd.shape[1] == 7, "obj_traj feature dim 1 is not correct"
+        lane_nd = np.vstack((lane_nd, r_lane_nd))
+        lane_id2mask[polyline_id] = (pre_lane_len, lane_nd.shape[0])
+        _tmp_len_2 = pre_lane_len - lane_nd.shape[0]
+        pre_lane_len = lane_nd.shape[0]
         polyline_id += 1
 
-        lane_nd = np.vstack((lane_nd, l_lane_nd, r_lane_nd))
+        assert _tmp_len_1 == _tmp_len_2, f"left, right lane vector length contradict"
+        # lane_nd = np.vstack((lane_nd, l_lane_nd, r_lane_nd))
 
-    data = [[traj_nd, lane_nd, gt]]
+    # transform gt to offset_gt
+    offset_gt = trans_gt_offset_format(gt)
+    # print(traj_id2mask)
+    # print(lane_id2mask)
+    polyline_features = np.vstack((traj_nd, lane_nd))
+    data = [[polyline_features, offset_gt, traj_id2mask, lane_id2mask]]
     return pd.DataFrame(
         data,
-        columns=['OBJ', "LANE", "GT"]
+        columns=["POLYLINE_FEATURES", "GT",
+                 "TRAJ_ID_TO_MASK", "LANE_ID_TO_MASK"]
     )
 
 
 def save_features(df, name, dir_=None):
     if dir_ is None:
-        dir_ = './features'
+        dir_ = './input_data'
     if not os.path.exists(dir_):
         os.makedirs(dir_)
 
