@@ -19,7 +19,8 @@ import os
 
 # hyper parameters
 DIR = 'input_data'
-epochs = 100
+SEED = 42
+epochs = 75
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 batch_size = 2
 decay_lr_factor = 0.9
@@ -28,11 +29,14 @@ lr = 0.005
 in_channels, out_channels = 7, 60
 show_every = 10
 
+
 if __name__ == "__main__":
-    def get_data_path_ls(dir_):
-        return [os.path.join(dir_, data_path) for data_path in os.listdir(dir_)]
+    np.random.seed(SEED)
+    torch.manual_seed(SEED)
 
     # data preparation
+    def get_data_path_ls(dir_):
+        return [os.path.join(dir_, data_path) for data_path in os.listdir(dir_)]
     data_path_ls = get_data_path_ls(DIR)
 
     # get model
@@ -106,7 +110,8 @@ if __name__ == "__main__":
 
             accum_loss += loss.item()
             print(f"loss for sample {sample_id}: {loss.item():.3f}")
-            show_predict_result(data, out, y, data['TARJ_LEN'].values[0])
+            show_predict_result(
+                data, out, y, data['TARJ_LEN'].values[0], True)
             plt.show()
 
     print(f"eval overall loss: {accum_loss / len(data_path_ls):.3f}")
