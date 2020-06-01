@@ -5,6 +5,7 @@ Still under construction:
 - [x] finish the feature preprocessor
 - [x] finish the hierarchical GNN
 - [x] overfit the tiny sample dataset
+- [ ] evaluate results on DE / ADE metrics
 - [ ] refine the feature preprocessor (how to encode the features)
 - [ ] Check the correctness of hierarchical-GNN's implementation
 - [ ] More advanced trajectory predictor, generate diverse trajectories (MultiPath, or variational RNNs; current using MLP)
