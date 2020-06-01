@@ -45,11 +45,11 @@ def reconstract_polyline(features, traj_mask, lane_mask, add_len):
 
 
 def show_pred_and_gt(pred_y, y):
-    plt.plot(y[:, 0], y[:, 1], color='m')
-    plt.plot(pred_y[:, 0], pred_y[:, 1], color='y')
+    plt.plot(y[:, 0], y[:, 1], color='r')
+    plt.plot(pred_y[:, 0], pred_y[:, 1], lw=0, marker='o', fillstyle='none')
 
 
-def show_predict_result(data, pred_y: torch.Tensor, y, add_len):
+def show_predict_result(data, pred_y: torch.Tensor, y, add_len, show_lane=True):
     features, _ = data['POLYLINE_FEATURES'].values[0], data['GT'].values[0].astype(
         np.float32)
     traj_mask, lane_mask = data["TRAJ_ID_TO_MASK"].values[0], data['LANE_ID_TO_MASK'].values[0]
@@ -62,8 +62,9 @@ def show_predict_result(data, pred_y: torch.Tensor, y, add_len):
         show_traj(traj, type_)
         type_ = 'OTHERS'
 
-    for lane in lane_ls:
-        show_doubled_lane(lane)
+    if show_lane:
+        for lane in lane_ls:
+            show_doubled_lane(lane)
 
     pred_y = pred_y.numpy().reshape((-1, 2)).cumsum(axis=0)
     y = y.numpy().reshape((-1, 2)).cumsum(axis=0)

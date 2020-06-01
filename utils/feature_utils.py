@@ -60,9 +60,11 @@ def compute_feature_for_one_seq(traj_df: pd.DataFrame, am: ArgoverseMap, obs_len
             == obs_len), "Obs len mismatch"
 
     # search nearby lane from the last observed point of agent
-    # [!polygon_ls]
+    # FIXME: nearby or rect?
+    # lane_feature_ls = get_nearby_lane_feature_ls(
+    #     am, agent_df, obs_len, city_name, lane_radius, norm_center)
     lane_feature_ls = get_nearby_lane_feature_ls(
-        am, agent_df, obs_len, city_name, lane_radius, norm_center)
+        am, agent_df, obs_len, city_name, lane_radius, norm_center, mode="rect", query_bbox=[-100, 100, -100, 100])
     # pdb.set_trace()
 
     # search nearby moving objects from the last observed point of agent
