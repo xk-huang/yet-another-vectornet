@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# @Time    : 2020-05-27 15:00
+# @Author  : Xiaoke Huang
+# @Email   : xiaokehuang@foxmail.com
+
 RAW_DATA_FORMAT = {
     "TIMESTAMP": 0,
     "TRACK_ID": 1,

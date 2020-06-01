@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# @Time    : 2020-05-27 15:00
+# @Author  : Xiaoke Huang
+# @Email   : xiaokehuang@foxmail.com
 # %%
 from utils.feature_utils import compute_feature_for_one_seq, encoding_features, save_features
 from argoverse.data_loading.argoverse_forecasting_loader import ArgoverseForecastingLoader
@@ -9,6 +14,7 @@ from typing import List, Dict, Any
 import os
 from utils.config import root_dir, lane_radius, obj_radius
 # %matplotlib inline
+
 
 if __name__ == "__main__":
     afl = ArgoverseForecastingLoader(root_dir)
@@ -25,4 +31,4 @@ if __name__ == "__main__":
         save_features(df, name)
 
 
-# %%
+@  # %%

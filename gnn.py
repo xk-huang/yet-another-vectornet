@@ -1,4 +1,9 @@
 # %%
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# @Time    : 2020-05-27 15:00
+# @Author  : Xiaoke Huang
+# @Email   : xiaokehuang@foxmail.com
 from torch_geometric.data import Data
 import torch
 import torch.nn as nn
@@ -13,6 +18,9 @@ import numpy as np
 import pdb
 import os
 # %%
+
+__author__ = "xiaoke huang"
+__email__ = "xiaokehuang@foxmail.com"
 
 
 def get_fc_edge_index(num_nodes):

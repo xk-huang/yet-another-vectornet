@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# @Time    : 2020-05-27 15:00
+# @Author  : Xiaoke Huang
+# @Email   : xiaokehuang@foxmail.com
 from utils.config import color_dict
 from argoverse.data_loading.argoverse_forecasting_loader import ArgoverseForecastingLoader
 from argoverse.map_representation.map_api import ArgoverseMap
