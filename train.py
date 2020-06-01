@@ -45,6 +45,7 @@ if __name__ == "__main__":
     optimizer = optim.Adam(model.parameters(), lr=lr)
     scheduler = optim.lr_scheduler.StepLR(
         optimizer, step_size=decay_lr_every, gamma=decay_lr_factor)
+    model = model.to(device=device)
 
     # overfit the small dataset
     # [FIXME]: unparallel batch processing
@@ -56,7 +57,7 @@ if __name__ == "__main__":
         for sample_id, data_p in enumerate(data_path_ls):
             data = pd.read_pickle(data_p)
             y = data['GT'].values[0].reshape(-1).astype(np.float32)
-            y = torch.from_numpy(y)
+            y = torch.from_numpy(y).to(device=device)
 
             # No Batch stuffs
             # optimizer.zero_grad()
@@ -76,17 +77,20 @@ if __name__ == "__main__":
                     loss = None
                 optimizer.zero_grad()
 
-            out = model(data)
+            out = model(data, device)
             sample_loss = F.mse_loss(out, y)
             loss = sample_loss if loss is None else sample_loss + loss
-        if sample_id % batch_size == 0:
-            if loss:
-                accum_loss += loss.item()
 
-                loss /= batch_size
-                loss.backward()
-                optimizer.step()
-                loss = None
+        if loss:
+            accum_loss += loss.item()
+            # for i, j in model.named_modules():
+            #     print("Check grad is ")
+            #     if isinstance(j, torch.nn.Linear):
+            #         print(i, j.weight.grad.max())
+            loss /= batch_size
+            loss.backward()
+            optimizer.step()
+            loss = None
             optimizer.zero_grad()
 
         scheduler.step()
@@ -105,7 +109,7 @@ if __name__ == "__main__":
             y = data['GT'].values[0].reshape(-1).astype(np.float32)
             y = torch.from_numpy(y)
 
-            out = model(data)
+            out = model(data, device)
             loss = F.mse_loss(out, y)
 
             accum_loss += loss.item()
