@@ -5,6 +5,7 @@ Still under construction:
 - [x] finish the feature preprocessor
 - [x] finish the hierarchical GNN
 - [x] overfit the tiny sample dataset
+- [ ] batchify the data and compute subgraph in parallel
 - [ ] evaluate results on DE / ADE metrics
 - [ ] refine the feature preprocessor (how to encode the features)
 - [ ] Check the correctness of hierarchical-GNN's implementation
@@ -17,22 +18,22 @@ Install the packages mentioned in requirements.txt
 pip install -r requirements.txt
 ```
 
-> torch==1.4.0
-> argoverse-api
-> numpy==1.18.1
-> pandas==1.0.0
-> matplotlib==3.1.1
+> torch==1.4.0, 
+> argoverse-api, 
+> numpy==1.18.1, 
+> pandas==1.0.0, 
+> matplotlib==3.1.1, 
 > torch-geometric==1.5.0
 
 ## Usage
 
-### 1) feature preprocessing (compute_feature_module.py)
+1) feature preprocessing (compute_feature_module.py)
 ```
 $ python compute_feature_module.py
 ```
 Use (200, 200) size for a single sequence as the paper told.
 
-### 2) train the model (train.py; overfit a tiny dataset)
+2) train the model (train.py; overfit a tiny dataset)
 ```
 $ python train.py
 ```
