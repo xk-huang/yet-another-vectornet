@@ -19,8 +19,9 @@ if __name__ == "__main__":
         name, ext = os.path.splitext(name)
 
         agent_feature, obj_feature_ls, lane_feature_ls = compute_feature_for_one_seq(
-            afl_.seq_df, am, 20, lane_radius, obj_radius, viz=True)
+            afl_.seq_df, am, 20, lane_radius, obj_radius, viz=False)
         df = encoding_features(agent_feature, obj_feature_ls, lane_feature_ls)
+        print(pd.DataFrame(df['POLYLINE_FEATURES'].values[0]).describe())
         save_features(df, name)
 
 

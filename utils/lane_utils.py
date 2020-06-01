@@ -1,3 +1,4 @@
+import pdb
 from argoverse.data_loading.argoverse_forecasting_loader import ArgoverseForecastingLoader
 from argoverse.map_representation.map_api import ArgoverseMap
 import matplotlib.pyplot as plt
@@ -63,6 +64,15 @@ def get_nearby_lane_feature_ls(am, agent_df, obs_len, city_name, lane_radius, no
             centerlane[:, :2] -= norm_center
             halluc_lane_1, halluc_lane_2 = get_halluc_lane(
                 centerlane, city_name)
+
+            # pdb.set_trace()
+            # BUG: halluc_lane_1, halluc_lane_2 might contain
+            # present solution, make z (hight) all be average
+            # if numpy.isnan(halluc_lane_1[:, 2]).any():
+            # halluc_lane_1[:, 2].fill(.0)
+            # halluc_lane_1[:, 5].fill(.0)
+            # halluc_lane_2[:, 2].fill(.0)
+            # halluc_lane_2[:, 5].fill(.0)
 
             if has_attr:
                 raise NotImplementedError()

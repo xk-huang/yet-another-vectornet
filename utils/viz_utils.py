@@ -6,6 +6,7 @@ import pandas as pd
 from typing import List, Dict, Any
 import os
 from utils.config import color_dict
+import torch
 
 
 def show_doubled_lane(polygon):
@@ -23,3 +24,42 @@ def show_traj(traj, type_):
     returns:
     """
     plt.plot(traj[:, 0], traj[:, 1], color=color_dict[type_])
+
+
+def reconstract_polyline(features, traj_mask, lane_mask, add_len):
+    traj_ls, lane_ls = [], []
+    for id_, mask in traj_mask.items():
+        data = features[mask[0]: mask[1]]
+        traj = np.vstack((data[:, 0:2], data[-1, 2:4]))
+        traj_ls.append(traj)
+    for id_, mask in lane_mask.items():
+        data = features[mask[0]+add_len: mask[1]+add_len]
+        lane = np.vstack((data[:, 0:2], data[-1, 3:5]))
+        lane_ls.append(lane)
+    return traj_ls, lane_ls
+
+
+def show_pred_and_gt(pred_y, y):
+    plt.plot(y[:, 0], y[:, 1], color='m')
+    plt.plot(pred_y[:, 0], pred_y[:, 1], color='y')
+
+
+def show_predict_result(data, pred_y: torch.Tensor, y, add_len):
+    features, _ = data['POLYLINE_FEATURES'].values[0], data['GT'].values[0].astype(
+        np.float32)
+    traj_mask, lane_mask = data["TRAJ_ID_TO_MASK"].values[0], data['LANE_ID_TO_MASK'].values[0]
+
+    traj_ls, lane_ls = reconstract_polyline(
+        features, traj_mask, lane_mask, add_len)
+
+    type_ = 'AGENT'
+    for traj in traj_ls:
+        show_traj(traj, type_)
+        type_ = 'OTHERS'
+
+    for lane in lane_ls:
+        show_doubled_lane(lane)
+
+    pred_y = pred_y.numpy().reshape((-1, 2)).cumsum(axis=0)
+    y = y.numpy().reshape((-1, 2)).cumsum(axis=0)
+    show_pred_and_gt(pred_y, y)

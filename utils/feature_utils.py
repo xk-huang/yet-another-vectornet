@@ -10,6 +10,8 @@ from utils.object_utils import get_nearby_moving_obj_feature_ls
 from utils.lane_utils import get_nearby_lane_feature_ls, get_halluc_lane
 from utils.viz_utils import show_doubled_lane, show_traj
 from utils.agent_utils import get_agent_feature_ls
+from utils.viz_utils import *
+import pdb
 
 
 def compute_feature_for_one_seq(traj_df: pd.DataFrame, am: ArgoverseMap, obs_len: int = 20, lane_radius: int = 5, obj_radius: int = 10, viz: bool = False) -> List[List]:
@@ -56,6 +58,7 @@ def compute_feature_for_one_seq(traj_df: pd.DataFrame, am: ArgoverseMap, obs_len
     # [!polygon_ls]
     lane_feature_ls = get_nearby_lane_feature_ls(
         am, agent_df, obs_len, city_name, lane_radius, norm_center)
+    # pdb.set_trace()
 
     # search nearby moving objects from the last observed point of agent
     obj_feature_ls = get_nearby_moving_obj_feature_ls(
@@ -177,16 +180,42 @@ def encoding_features(agent_feature, obj_feature_ls, lane_feature_ls):
         assert _tmp_len_1 == _tmp_len_2, f"left, right lane vector length contradict"
         # lane_nd = np.vstack((lane_nd, l_lane_nd, r_lane_nd))
 
+    # FIXME: handling `nan` in lane_nd
+    col_mean = np.nanmean(lane_nd, axis=0)
+    if np.isnan(col_mean).any():
+        # raise ValueError(
+        print(f"{col_mean}\nall z (height) coordinates are `nan`!!!!")
+        lane_nd[:, 2].fill(.0)
+        lane_nd[:, 5].fill(.0)
+    else:
+        inds = np.where(np.isnan(lane_nd))
+        lane_nd[inds] = np.take(col_mean, inds[1])
+
+    # traj_ls, lane_ls = reconstract_polyline(
+    #     np.vstack((traj_nd, lane_nd)), traj_id2mask, lane_id2mask, traj_nd.shape[0])
+    # type_ = 'AGENT'
+    # for traj in traj_ls:
+    #     show_traj(traj, type_)
+    #     type_ = 'OTHERS'
+
+    # for lane in lane_ls:
+    #     show_doubled_lane(lane)
+    # plt.show()
+
     # transform gt to offset_gt
     offset_gt = trans_gt_offset_format(gt)
     # print(traj_id2mask)
     # print(lane_id2mask)
-    polyline_features = np.vstack((traj_nd, lane_nd))
-    data = [[polyline_features, offset_gt, traj_id2mask, lane_id2mask]]
+
+    # don't ignore the id
+    polyline_features = np.vstack((traj_nd, lane_nd))[:, :]
+    data = [[polyline_features.astype(
+        np.float32), offset_gt, traj_id2mask, lane_id2mask, traj_nd.shape[0], lane_nd.shape[0]]]
+
     return pd.DataFrame(
         data,
         columns=["POLYLINE_FEATURES", "GT",
-                 "TRAJ_ID_TO_MASK", "LANE_ID_TO_MASK"]
+                 "TRAJ_ID_TO_MASK", "LANE_ID_TO_MASK", "TARJ_LEN", "LANE_LEN"]
     )
 
 
