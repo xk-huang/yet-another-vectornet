@@ -19,10 +19,11 @@ from utils.viz_utils import *
 import pdb
 
 
-def compute_feature_for_one_seq(traj_df: pd.DataFrame, am: ArgoverseMap, obs_len: int = 20, lane_radius: int = 5, obj_radius: int = 10, viz: bool = False) -> List[List]:
+def compute_feature_for_one_seq(traj_df: pd.DataFrame, am: ArgoverseMap, obs_len: int = 20, lane_radius: int = 5, obj_radius: int = 10, viz: bool = False, mode='rect', query_bbox=[-100, 100, -100, 100]) -> List[List]:
     """
     return lane & track features
     args:
+        mode: 'rect' or 'nearby'
     returns:
         agent_feature_ls:
             list of (doubeld_track, object_type, timetamp, track_id, not_doubled_groudtruth_feature_trajectory)
@@ -64,7 +65,7 @@ def compute_feature_for_one_seq(traj_df: pd.DataFrame, am: ArgoverseMap, obs_len
     # lane_feature_ls = get_nearby_lane_feature_ls(
     #     am, agent_df, obs_len, city_name, lane_radius, norm_center)
     lane_feature_ls = get_nearby_lane_feature_ls(
-        am, agent_df, obs_len, city_name, lane_radius, norm_center, mode="rect", query_bbox=[-100, 100, -100, 100])
+        am, agent_df, obs_len, city_name, lane_radius, norm_center, mode=mode, query_bbox=query_bbox)
     # pdb.set_trace()
 
     # search nearby moving objects from the last observed point of agent
