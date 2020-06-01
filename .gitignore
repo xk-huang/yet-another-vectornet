@@ -1,0 +1,5 @@
+/tmp
+/input_data
+.vscode
+*.pyc
+.DS_Store
