@@ -19,9 +19,6 @@ import pdb
 import os
 # %%
 
-__author__ = "xiaoke huang"
-__email__ = "xiaokehuang@foxmail.com"
-
 
 def get_fc_edge_index(num_nodes):
     to_ = np.arange(num_nodes, dtype=np.int64)
@@ -38,7 +35,8 @@ class HGNN(nn.Module):
         self.polyline_vec_shape = in_channels * (2 ** num_subgraph_layres)
         self.subgraph = SubGraph(
             in_channels, num_subgraph_layres, subgraph_width)
-        self.self_atten_layer = SelfAttentionLayer(self.polyline_vec_shape)
+        self.self_atten_layer = SelfAttentionLayer(
+            self.polyline_vec_shape, need_scale=True)
         self.traj_pred_mlp = TrajPredMLP(
             self.polyline_vec_shape, out_channels, global_graph_width)
 
@@ -108,12 +106,18 @@ class HGNN(nn.Module):
 
 
 class SelfAttentionLayer(nn.Module):
-    def __init__(self, in_channels):
+    """
+    Self-attention layer. add scale_factor d_k personally(not described in the paper)
+    """
+
+    def __init__(self, in_channels, need_scale=False):
         super(SelfAttentionLayer, self).__init__()
         self.in_channels = in_channels
         self.q_lin = nn.Linear(in_channels, in_channels)
         self.k_lin = nn.Linear(in_channels, in_channels)
         self.v_lin = nn.Linear(in_channels, in_channels)
+        self.scale_factor_d = 1 + \
+            int(np.sqrt(self.in_channels)) if need_scale else 1
 
     def forward(self, x):
         # print(x.shape)
@@ -122,7 +126,7 @@ class SelfAttentionLayer(nn.Module):
         k_x = self.k_lin(x)
         v_x = self.v_lin(x)
         atten = F.softmax(torch.matmul(
-            q_x, k_x.t() / 1+int(np.sqrt(self.in_channels))), dim=1)
+            q_x, k_x.t() / self.scale_factor_d), dim=1)
         return torch.matmul(atten, v_x)
 
 
@@ -208,7 +212,7 @@ if __name__ == "__main__":
     data_path_ls = get_data_path_ls(DIR)
 
     # hyper parameters
-    epochs = 50
+    epochs = 100
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     batch_size = 2
     decay_lr_factor = 0.9
