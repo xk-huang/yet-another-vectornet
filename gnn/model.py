@@ -30,15 +30,15 @@ def get_fc_edge_index(num_nodes):
 
 
 class HGNN(nn.Module):
-    def __init__(self, in_channels, out_channels, num_subgraph_layres=3, num_global_graph_layer=1, subgraph_width=64, global_graph_width=64):
+    def __init__(self, in_channels, out_channels, num_subgraph_layres=3, num_global_graph_layer=1, subgraph_width=64, global_graph_width=64, traj_pred_mlp_width=64):
         super(HGNN, self).__init__()
         self.polyline_vec_shape = in_channels * (2 ** num_subgraph_layres)
         self.subgraph = SubGraph(
             in_channels, num_subgraph_layres, subgraph_width)
         self.self_atten_layer = SelfAttentionLayer(
-            self.polyline_vec_shape, need_scale=True)
+            self.polyline_vec_shape, global_graph_width, need_scale=False)
         self.traj_pred_mlp = TrajPredMLP(
-            self.polyline_vec_shape, out_channels, global_graph_width)
+            global_graph_width, out_channels, traj_pred_mlp_width)
 
     def forward(self, data, device):
         """
@@ -112,12 +112,12 @@ class SelfAttentionLayer(nn.Module):
     Self-attention layer. add scale_factor d_k personally(not described in the paper)
     """
 
-    def __init__(self, in_channels, need_scale=False):
+    def __init__(self, in_channels, global_graph_width, need_scale=False):
         super(SelfAttentionLayer, self).__init__()
         self.in_channels = in_channels
-        self.q_lin = nn.Linear(in_channels, in_channels)
-        self.k_lin = nn.Linear(in_channels, in_channels)
-        self.v_lin = nn.Linear(in_channels, in_channels)
+        self.q_lin = nn.Linear(in_channels, global_graph_width)
+        self.k_lin = nn.Linear(in_channels, global_graph_width)
+        self.v_lin = nn.Linear(in_channels, global_graph_width)
         self.scale_factor_d = 1 + \
             int(np.sqrt(self.in_channels)) if need_scale else 1
 
