@@ -21,4 +21,5 @@ STATIONARY_THRESHOLD = (13)
 color_dict = {"AGENT": "#d33e4c", "OTHERS": "#d3e8ef", "AV": "#007672"}
 lane_radius = 5
 obj_radius = 20
-root_dir = '../data/forecasting_sample/data/'
+root_dir = '../forecasting_sample/data/'
+SAVE_DIR = './input_data'

@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 from typing import List, Dict, Any
 import os
-from utils.config import root_dir, lane_radius, obj_radius
+from utils.config import root_dir, lane_radius, obj_radius, SAVE_DIR
 # %matplotlib inline
 
 
@@ -28,7 +28,7 @@ if __name__ == "__main__":
             afl_.seq_df, am, 20, lane_radius, obj_radius, viz=True, mode='nearby')
         df = encoding_features(agent_feature, obj_feature_ls, lane_feature_ls)
         print(pd.DataFrame(df['POLYLINE_FEATURES'].values[0]).describe())
-        save_features(df, name)
+        save_features(df, name, SAVE_DIR)
 
 
 # %%

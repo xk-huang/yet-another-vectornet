@@ -80,7 +80,8 @@ class HGNN(nn.Module):
             edge_index_ = get_fc_edge_index(data_.shape[0])
             sub_data = Data(x=torch.from_numpy(data_),
                             edge_index=torch.from_numpy(edge_index_))
-
+            sub_data = sub_data.to(device)
+            
             subgraph_node_features = self.subgraph(sub_data)
             # print(f"{id_}'s max: {subgraph_node_features.max()}")
             # pdb.set_trace()
