@@ -5,10 +5,10 @@ Still under construction:
 - [x] finish the feature preprocessor
 - [x] finish the hierarchical GNN
 - [x] overfit the tiny sample dataset
-- [ ] batchify the data and compute subgraph in parallel
+- [x] batchify the data and compute subgraph in parallel
 - [ ] evaluate results on DE / ADE metrics
-- [ ] refine the feature preprocessor (how to encode the features)
-- [ ] Check the correctness of hierarchical-GNN's implementation
+- [x] refine the feature preprocessor (how to encode the features)
+- [x] Check the correctness of hierarchical-GNN's implementation
 - [ ] More advanced trajectory predictor, generate diverse trajectories (MultiPath, or variational RNNs; current using MLP)
 - [ ] run on the whole dataset
 
@@ -33,7 +33,7 @@ $ python compute_feature_module.py
 ```
 Use (200, 200) size for a single sequence as the paper told.
 
-2) train the model (train.py; overfit a tiny dataset)
+2) train the model (`train.py`; overfit a tiny dataset, and use `GraphDataset` in `dataset.py` to batchify the data)
 ```
 $ python train.py
 ```
