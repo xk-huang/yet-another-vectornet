@@ -49,7 +49,7 @@ class GraphDataset(InMemoryDataset):
 
     @property
     def processed_file_names(self):
-        return [DATASET_NAME]
+        return ['dataset.dataset']
 
     def download(self):
         pass
@@ -98,7 +98,7 @@ class GraphDataset(InMemoryDataset):
             x = np.vstack(x_ls)
             data_ls.append([x, y, cluster, edge_index])
 
-        # [x, y, cluster, edge_index]
+        # [x, y, cluster, edge_index, valid_len]
         g_ls = []
         padd_to_index = np.max(valid_len_ls)
         feature_len = data_ls[0][0].shape[1]
@@ -112,7 +112,8 @@ class GraphDataset(InMemoryDataset):
                 y=torch.from_numpy(tup[1]),
                 cluster=torch.from_numpy(tup[2]),
                 edge_index=torch.from_numpy(tup[3]),
-                valid_len=valid_len_ls[ind]
+                valid_len=valid_len_ls[ind],
+                time_step_len=padd_to_index + 1
             )
             from pdb import set_trace
             # set_trace()
