@@ -19,14 +19,14 @@ import os
 
 # hyper parameters
 DIR = 'input_data'
-SEED = 42
-epochs = 25
+SEED = 13
+epochs = 75
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 batch_size = 2
-decay_lr_factor = 0.9
-decay_lr_every = 10
+decay_lr_factor = 0.7
+decay_lr_every = 20
 lr = 0.005
-in_channels, out_channels = 7, 60
+in_channels, out_channels = 8, 60
 show_every = 10
 
 
@@ -108,7 +108,6 @@ if __name__ == "__main__":
             data = pd.read_pickle(data_p)
             y = data['GT'].values[0].reshape(-1).astype(np.float32)
             y = torch.from_numpy(y).to(device=device)
-
 
             out = model(data, device)
             loss = F.mse_loss(out, y)
