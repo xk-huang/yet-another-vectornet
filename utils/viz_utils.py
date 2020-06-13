@@ -39,7 +39,9 @@ def reconstract_polyline(features, traj_mask, lane_mask, add_len):
         traj_ls.append(traj)
     for id_, mask in lane_mask.items():
         data = features[mask[0]+add_len: mask[1]+add_len]
-        lane = np.vstack((data[:, 0:2], data[-1, 3:5]))
+        # lane = np.vstack((data[:, 0:2], data[-1, 3:5]))
+        # change lanes feature to (xs, ys, zs, xe, ye, ze, polyline_id)
+        lane = np.vstack((data[:, 0:2], data[-1, 2:4]))
         lane_ls.append(lane)
     return traj_ls, lane_ls
 

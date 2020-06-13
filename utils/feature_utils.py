@@ -122,7 +122,10 @@ def encoding_features(agent_feature, obj_feature_ls, lane_feature_ls):
             list of list of lane a segment feature, formatted in [left_lane, right_lane, is_traffic_control, is_intersection, lane_id]
     returns:
         pd.DataFrame of (
-            polyline_features: vstack[(xs, ys, xe, ye, obejct_type, timestamp(avg_for_start_end?), (xs, ys, zs, xe, ye, ze, polyline_id)]
+            polyline_features: vstack[
+                (xs, ys, xe, ye, timestamp, NULL, NULL, polyline_id),
+                (xs, ys, xe, ye, NULL, zs, ze, polyline_id)
+                ]
             offset_gt: incremental offset from agent's last obseved point,
             traj_id2mask: Dict[int, int]
             lane_id2mask: Dict[int, int]
@@ -212,11 +215,22 @@ def encoding_features(agent_feature, obj_feature_ls, lane_feature_ls):
 
     # transform gt to offset_gt
     offset_gt = trans_gt_offset_format(gt)
-    # print(traj_id2mask)
-    # print(lane_id2mask)
+
+    # now the features are:
+    # (xs, ys, xe, ye, obejct_type, timestamp(avg_for_start_end?),polyline_id) for object
+    # (xs, ys, zs, xe, ye, ze, polyline_id) for lanes
+
+    # change lanes feature to xs, ys, xe, ye, NULL, zs, ze, polyline_id)
+    lane_nd = np.hstack(
+        [lane_nd, np.zeros((lane_nd.shape[0], 1), dtype=lane_nd.dtype)])
+    lane_nd = lane_nd[:, [0, 1, 3, 4, 7, 2, 5, 6]]
+    # change object features to (xs, ys, xe, ye, timestamp, NULL, NULL, polyline_id)
+    traj_nd = np.hstack(
+        [traj_nd, np.zeros((traj_nd.shape[0], 2), dtype=traj_nd.dtype)])
+    traj_nd = traj_nd[:, [0, 1, 2, 3, 5, 7, 8, 6]]
 
     # don't ignore the id
-    polyline_features = np.vstack((traj_nd, lane_nd))[:, :]
+    polyline_features = np.vstack((traj_nd, lane_nd))
     data = [[polyline_features.astype(
         np.float32), offset_gt, traj_id2mask, lane_id2mask, traj_nd.shape[0], lane_nd.shape[0]]]
 

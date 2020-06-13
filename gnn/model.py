@@ -58,7 +58,7 @@ class HGNN(nn.Module):
         add_len = data['TARJ_LEN'].values[0]
         agent_id = 0
         assert all_in_features[agent_id][
-            4] == 1, f"agent id is wrong. id {agent_id}: type {all_in_features[agent_id][4]}"
+            -1] == 0, f"agent id is wrong. id {agent_id}: type {all_in_features[agent_id][4]}"
 
         # compute in subgraph
         polyline_features = []
