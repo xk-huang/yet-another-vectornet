@@ -3,3 +3,5 @@
 .vscode
 *.pyc
 .DS_Store
+/processed
+/raw

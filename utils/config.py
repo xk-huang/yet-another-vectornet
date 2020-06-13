@@ -24,3 +24,4 @@ obj_radius = 20
 root_dir = '../forecasting_sample/data/'
 SAVE_DIR = './input_data'
 OBS_LEN = 20
+DATASET_NAME = 'SAMPLE_DATASET.dataset'
