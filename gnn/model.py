@@ -81,7 +81,7 @@ class HGNN(nn.Module):
             sub_data = Data(x=torch.from_numpy(data_),
                             edge_index=torch.from_numpy(edge_index_))
             sub_data = sub_data.to(device)
-            
+
             subgraph_node_features = self.subgraph(sub_data)
             # print(f"{id_}'s max: {subgraph_node_features.max()}")
             # pdb.set_trace()
@@ -188,20 +188,14 @@ class GraphLayerProp(MessagePassing):
         )
 
     def forward(self, x, edge_index):
-        # print(x.shape)
         x = self.mlp(x)
-        aggr_x = self.propagate(edge_index, size=(x.size(0), x.size(0)), x=x)
-        # print(x)
-        # print(aggr_x)
-        assert x.shape == aggr_x.shape, "aggr shape not the same."
-
-        return torch.cat([x, aggr_x], dim=1)
+        return self.propagate(edge_index, size=(x.size(0), x.size(0)), x=x)
 
     def message(self, x_j):
         return x_j
 
-    def update(self, x):
-        return x
+    def update(self, aggr_out, x):
+        return torch.cat([x, aggr_out], dim=1)
 
 
 # %%
