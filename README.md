@@ -7,6 +7,7 @@ Still under construction:
 - [x] overfit the tiny sample dataset
 - [x] batchify the data and compute subgraph in parallel
 - [ ] evaluate results on DE / ADE metrics
+- [ ] add uni-test for each modules
 - [x] refine the feature preprocessor (how to encode the features)
 - [x] Check the correctness of hierarchical-GNN's implementation
 - [ ] More advanced trajectory predictor, generate diverse trajectories (MultiPath, or variational RNNs; current using MLP)
