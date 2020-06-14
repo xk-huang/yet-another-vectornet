@@ -31,6 +31,7 @@ decay_lr_every = 20
 lr = 0.005
 in_channels, out_channels = 8, 60
 show_every = 10
+
 if __name__ == "__main__":
     np.random.seed(SEED)
     torch.manual_seed(SEED)
@@ -46,7 +47,6 @@ if __name__ == "__main__":
     model = model.to(device=device)
 
     # overfit the small dataset
-    # [FIXME]: unparallel batch processing
     model.train()
     for epoch in range(epochs):
         acc_loss = .0
@@ -82,43 +82,3 @@ if __name__ == "__main__":
                 show_pred_and_gt(pred_y, y)
                 plt.show()
         print(f"eval overall loss: {accum_loss / len(ds):.3f}")
-
-
-# %%
-    #     for sample_id, data_p in enumerate(data_path_ls):
-    #         print(f"sample id: {sample_id}")
-    #         data = pd.read_pickle(data_p)
-    #         y = data['GT'].values[0].reshape(-1).astype(np.float32)
-    #         y = torch.from_numpy(y).to(device=device)
-
-    #         out = model(data, device)
-    #         loss = F.mse_loss(out, y)
-
-    #         accum_loss += loss.item()
-    #         print(f"loss for sample {sample_id}: {loss.item():.3f}")
-    #         show_predict_result(
-    #             data, out, y, data['TARJ_LEN'].values[0], True)
-    #         plt.show()
-
-    # print(f"eval overall loss: {accum_loss / len(data_path_ls):.3f}")
-    # print(y)
-
-    # edge_index = torch.tensor(
-    #     [[1, 2, 0, 2, 0, 1],
-    #         [0, 0, 1, 1, 2, 2]], dtype=torch.long)
-    # x = torch.tensor([[3, 1, 2], [2, 3, 1], [1, 2, 3]], dtype=torch.float)
-    # y = torch.tensor([1, 2, 3, 4], dtype=torch.float)
-    # data = Data(x=x, edge_index=edge_index, y=y)
-
-    # data = pd.read_pickle('./input_data/features_4791.pkl')
-    # all_in_features_, y = data['POLYLINE_FEATURES'].values[0], data['GT'].values[0].reshape(-1).astype(np.float32)
-    # traj_mask_, lane_mask_ = data["TRAJ_ID_TO_MASK"].values[0], data['LANE_ID_TO_MASK'].values[0]
-    # y = torch.from_numpy(y)
-    # in_channels, out_channels = all_in_features_.shape[1], y.shape[0]
-    # print(f"all feature shape: {all_in_features_.shape}, gt shape: {y.shape}")
-    # print(f"len of trajs: {traj_mask_}, len of lanes: {lane_mask_}")
-
-# %%
-
-
-# %%

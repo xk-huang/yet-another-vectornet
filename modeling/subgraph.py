@@ -14,6 +14,10 @@ import os
 
 
 class SubGraph(nn.Module):
+    """
+    Subgraph that computes all vectors in a polyline, and get a polyline-level feature
+    """
+
     def __init__(self, in_channels, num_subgraph_layres=3, hidden_unit=64):
         super(SubGraph, self).__init__()
         self.num_subgraph_layres = num_subgraph_layres
@@ -49,6 +53,10 @@ class SubGraph(nn.Module):
 
 
 class GraphLayerProp(MessagePassing):
+    """
+    Message Passing mechanism for infomation aggregation
+    """
+
     def __init__(self, in_channels, hidden_unit=64):
         super(GraphLayerProp, self).__init__(
             aggr='max')  # MaxPooling aggragation

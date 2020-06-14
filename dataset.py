@@ -15,6 +15,9 @@ from utils.config import root_dir, lane_radius, obj_radius, SAVE_DIR, OBS_LEN, D
 
 # %%
 def get_fc_edge_index(num_nodes, start=0):
+    """
+    return a tensor(2, edges), indicing edge_index
+    """
     to_ = np.arange(num_nodes, dtype=np.int64)
     edge_index = np.empty((2, 0))
     for i in range(num_nodes):
@@ -27,6 +30,10 @@ def get_fc_edge_index(num_nodes, start=0):
 
 
 class GraphData(Data):
+    """
+    override key `cluster` indicating which polyline_id is for the vector
+    """
+
     def __inc__(self, key, value):
         if key == 'edge_index':
             return self.x.size(0)
@@ -39,6 +46,10 @@ class GraphData(Data):
 
 
 class GraphDataset(InMemoryDataset):
+    """
+    dataset object similar to `torchvision` 
+    """
+
     def __init__(self, root, transform=None, pre_transform=None):
         super(GraphDataset, self).__init__(root, transform, pre_transform)
         self.data, self.slices = torch.load(self.processed_paths[0])

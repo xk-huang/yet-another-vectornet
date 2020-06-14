@@ -14,7 +14,11 @@ import os
 
 
 def masked_softmax(X, valid_len):
-    # X: 3-D tensor, valid_len: 1-D or 2-D tensor
+    """
+    masked softmax for attention scores
+    args:
+        X: 3-D tensor, valid_len: 1-D or 2-D tensor
+    """
     if valid_len is None:
         return nn.functional.softmax(X, dim=-1)
     else:
@@ -33,7 +37,7 @@ def masked_softmax(X, valid_len):
 
 class SelfAttentionLayer(nn.Module):
     """
-    Self-attention layer. add scale_factor d_k personally(not described in the paper)
+    Self-attention layer. no scale_factor d_k
     """
 
     def __init__(self, in_channels, global_graph_width, need_scale=False):
