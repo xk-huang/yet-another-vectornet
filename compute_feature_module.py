@@ -12,23 +12,33 @@ import numpy as np
 import pandas as pd
 from typing import List, Dict, Any
 import os
-from utils.config import root_dir, lane_radius, obj_radius, SAVE_DIR, OBS_LEN
+from utils.config import DATA_DIR, LANE_RADIUS, OBJ_RADIUS, OBS_LEN, INTERMEDIATE_DATA_DIR
+from tqdm import tqdm
+import re
 # %matplotlib inline
 
 
 if __name__ == "__main__":
-    afl = ArgoverseForecastingLoader(root_dir)
     am = ArgoverseMap()
-    for name in afl.seq_list:
-        afl_ = afl.get(name)
-        path, name = os.path.split(name)
-        name, ext = os.path.splitext(name)
+    for folder in os.listdir(DATA_DIR):
+        if not re.search(r'val|train|sample|test', folder):
+            continue
+        afl = ArgoverseForecastingLoader(os.path.join(DATA_DIR, folder))
+        for name in tqdm(afl.seq_list):
+            afl_ = afl.get(name)
+            path, name = os.path.split(name)
+            name, ext = os.path.splitext(name)
 
-        agent_feature, obj_feature_ls, lane_feature_ls = compute_feature_for_one_seq(
-            afl_.seq_df, am, OBS_LEN, lane_radius, obj_radius, viz=True, mode='nearby')
-        df = encoding_features(agent_feature, obj_feature_ls, lane_feature_ls)
-        print(pd.DataFrame(df['POLYLINE_FEATURES'].values[0]).describe())
-        save_features(df, name, SAVE_DIR)
+            agent_feature, obj_feature_ls, lane_feature_ls = compute_feature_for_one_seq(
+                afl_.seq_df, am, OBS_LEN, LANE_RADIUS, OBJ_RADIUS, viz=False, mode='nearby')
+            df = encoding_features(
+                agent_feature, obj_feature_ls, lane_feature_ls)
+            save_features(df, name, os.path.join(
+                INTERMEDIATE_DATA_DIR, f"{folder}_intermediate"))
+            # print(pd.DataFrame(df['POLYLINE_FEATURES'].values[0]).describe())
+
+
+# %%
 
 
 # %%

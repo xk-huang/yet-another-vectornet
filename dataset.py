@@ -10,7 +10,8 @@ from torch_geometric.data import InMemoryDataset
 from torch_geometric.data import Data, DataLoader
 import torch
 from utils.feature_utils import compute_feature_for_one_seq, encoding_features, save_features
-from utils.config import root_dir, lane_radius, obj_radius, SAVE_DIR, OBS_LEN, DATASET_NAME
+from utils.config import DATA_DIR, LANE_RADIUS, OBJ_RADIUS, OBS_LEN, INTERMEDIATE_DATA_DIR
+from tqdm import tqdm
 
 
 # %%
@@ -60,7 +61,7 @@ class GraphDataset(InMemoryDataset):
 
     @property
     def processed_file_names(self):
-        return ['dataset.dataset']
+        return ['dataset.pt']
 
     def download(self):
         pass
@@ -69,12 +70,14 @@ class GraphDataset(InMemoryDataset):
 
         def get_data_path_ls(dir_):
             return [os.path.join(dir_, data_path) for data_path in os.listdir(dir_)]
-        data_path_ls = get_data_path_ls(SAVE_DIR)
+        data_path_ls = get_data_path_ls(self.root)
 
         valid_len_ls = []
         valid_len_ls = []
         data_ls = []
-        for data_p in data_path_ls:
+        for data_p in tqdm(data_path_ls):
+            if not data_p.endswith('pkl'):
+                continue
             x_ls = []
             y = None
             cluster = None
@@ -135,10 +138,12 @@ class GraphDataset(InMemoryDataset):
 
 # %%
 if __name__ == "__main__":
-
-    dataset = GraphDataset('.')
-    batch_iter = DataLoader(dataset, batch_size=2)
-    batch = next(iter(batch_iter))
+    for folder in os.listdir(DATA_DIR):
+        dataset_input_path = os.path.join(
+            INTERMEDIATE_DATA_DIR, f"{folder}_intermediate")
+        dataset = GraphDataset(dataset_input_path)
+        batch_iter = DataLoader(dataset, batch_size=2)
+        batch = next(iter(batch_iter))
 
 
 # %%

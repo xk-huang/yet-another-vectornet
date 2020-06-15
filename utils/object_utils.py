@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 from typing import List, Dict, Any
 import os
-from utils.config import VELOCITY_THRESHOLD, RAW_DATA_FORMAT, obj_radius, EXIST_THRESHOLD
+from utils.config import VELOCITY_THRESHOLD, RAW_DATA_FORMAT, OBJ_RADIUS, EXIST_THRESHOLD
 
 
 def compute_velocity(track_df: pd.DataFrame) -> List[float]:
@@ -136,7 +136,7 @@ def get_nearby_moving_obj_feature_ls(agent_df, traj_df, obs_len, seq_ts, norm_ce
         else:
             xys = remain_df[['X', 'Y']].values
         p1 = xys[obs_len-1]
-        if np.linalg.norm(p0 - p1) > obj_radius:
+        if np.linalg.norm(p0 - p1) > OBJ_RADIUS:
             continue
 
         xys -= norm_center  # normalize to last observed timestamp point of agent

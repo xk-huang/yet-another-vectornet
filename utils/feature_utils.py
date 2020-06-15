@@ -195,7 +195,7 @@ def encoding_features(agent_feature, obj_feature_ls, lane_feature_ls):
     col_mean = np.nanmean(lane_nd, axis=0)
     if np.isnan(col_mean).any():
         # raise ValueError(
-        print(f"{col_mean}\nall z (height) coordinates are `nan`!!!!")
+        # print(f"{col_mean}\nall z (height) coordinates are `nan`!!!!")
         lane_nd[:, 2].fill(.0)
         lane_nd[:, 5].fill(.0)
     else:
