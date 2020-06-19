@@ -17,29 +17,37 @@ import pdb
 import os
 from dataset import GraphDataset
 from torch_geometric.data import DataLoader
-# %%
+from utils.eval import get_eval_metric_results
 
 
 # %%
-DIR = 'input_data'
+TRAIN_DIR = os.path.join('interm_data', 'train_intermediate')
+VAL_DIR = os.path.join('interm_data', 'val_intermediate')
 SEED = 13
-epochs = 50
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-batch_size = 2
-decay_lr_factor = 0.7
-decay_lr_every = 20
-lr = 0.005
+epochs = 25
+device = torch.device('cuda:3' if torch.cuda.is_available() else 'cpu')
+batch_size = 256
+decay_lr_factor = 0.3
+decay_lr_every = 5
+lr = 0.001
 in_channels, out_channels = 8, 60
 show_every = 10
+val_every = 1
+# eval related
+max_n_guesses = 1
+horizon = 30
+miss_threshold = 2.0
 
 if __name__ == "__main__":
     np.random.seed(SEED)
     torch.manual_seed(SEED)
     # hyper parameters
 
-    ds = GraphDataset('.')
-    ds.shuffle()
-    train_loader = DataLoader(ds, batch_size=batch_size)
+    train_data = GraphDataset(TRAIN_DIR).shuffle()
+    val_Data = GraphDataset(VAL_DIR)
+    train_loader = DataLoader(train_data, batch_size=batch_size)
+    val_loader = DataLoader(val_data, batch_size=batch_size)
+
     model = HGNN(in_channels, out_channels).to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr)
     scheduler = optim.lr_scheduler.StepLR(
@@ -61,24 +69,30 @@ if __name__ == "__main__":
             optimizer.step()
         print(
             f"loss at epoch {epoch}: {acc_loss / len(ds):.3f}, lr{optimizer.state_dict()['param_groups'][0]['lr']: .3f}")
+        if (epoch+1) % val_every == 0:
+            get_eval_metric_results(model, val_loader, device, out_channels, max_n_guesses, horizon, miss_threshold)
+
 
     # eval result on the identity dataset
-    model.eval()
-    from utils.viz_utils import show_pred_and_gt
-    with torch.no_grad():
-        accum_loss = .0
-        for sample_id, data in enumerate(train_loader):
-            data = data.to(device)
-            gt = data.y.view(-1, out_channels).to(device)
-            optimizer.zero_grad()
-            out = model(data)
-            loss = F.mse_loss(out, gt)
-            accum_loss += batch_size * loss.item()
-            print(f"loss for sample {sample_id}: {loss.item():.3f}")
+    get_eval_metric_results(model, val_loader, device, out_channels, max_n_guesses, horizon, miss_threshold)
 
-            for i in range(gt.size(0)):
-                pred_y = out[i].numpy().reshape((-1, 2)).cumsum(axis=0)
-                y = gt[i].numpy().reshape((-1, 2)).cumsum(axis=0)
-                show_pred_and_gt(pred_y, y)
-                plt.show()
-        print(f"eval overall loss: {accum_loss / len(ds):.3f}")
+
+    # model.eval()
+    # from utils.viz_utils import show_pred_and_gt
+    # with torch.no_grad():
+    #     accum_loss = .0
+    #     for sample_id, data in enumerate(train_loader):
+    #         data = data.to(device)
+    #         gt = data.y.view(-1, out_channels).to(device)
+    #         optimizer.zero_grad()
+    #         out = model(data)
+    #         loss = F.mse_loss(out, gt)
+    #         accum_loss += batch_size * loss.item()
+    #         print(f"loss for sample {sample_id}: {loss.item():.3f}")
+
+    #         for i in range(gt.size(0)):
+    #             pred_y = out[i].numpy().reshape((-1, 2)).cumsum(axis=0)
+    #             y = gt[i].numpy().reshape((-1, 2)).cumsum(axis=0)
+    #             show_pred_and_gt(pred_y, y)
+    #             plt.show()
+    #     print(f"eval overall loss: {accum_loss / len(ds):.3f}")
