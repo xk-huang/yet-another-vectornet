@@ -11,7 +11,7 @@ Still under construction:
 - [x] refine the feature preprocessor (how to encode the features)
 - [x] Check the correctness of hierarchical-GNN's implementation
 - [ ] More advanced trajectory predictor, generate diverse trajectories (MultiPath, or variational RNNs; current using MLP)
-- [ ] run on the whole dataset
+- [x] run on the whole dataset (running)
 
 ## Environment
 Install the packages mentioned in requirements.txt
