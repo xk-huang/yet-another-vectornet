@@ -142,7 +142,7 @@ if __name__ == "__main__":
         dataset_input_path = os.path.join(
             INTERMEDIATE_DATA_DIR, f"{folder}_intermediate")
         dataset = GraphDataset(dataset_input_path)
-        batch_iter = DataLoader(dataset, batch_size=2)
+        batch_iter = DataLoader(dataset, batch_size=256)
         batch = next(iter(batch_iter))
 
 

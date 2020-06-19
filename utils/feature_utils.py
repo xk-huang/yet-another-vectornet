@@ -155,6 +155,9 @@ def encoding_features(agent_feature, obj_feature_ls, lane_feature_ls):
     # encoding obj feature
     for obj_feature in obj_feature_ls:
         obj_len = obj_feature[0].shape[0]
+        # assert obj_feature[2].shape[0] == obj_len, f"obs_len of obj is {obj_len}"
+        if not obj_feature[2].shape[0] == obj_len:
+            from pdb import set_trace;set_trace()
         obj_nd = np.hstack((obj_feature[0], np.zeros(
             (obj_len, 1)), obj_feature[2].reshape((-1, 1)), np.ones((obj_len, 1)) * polyline_id))
         assert obj_nd.shape[1] == 7, "obj_traj feature dim 1 is not correct"

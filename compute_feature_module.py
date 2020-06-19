@@ -21,7 +21,8 @@ import re
 if __name__ == "__main__":
     am = ArgoverseMap()
     for folder in os.listdir(DATA_DIR):
-        if not re.search(r'val|train|sample|test', folder):
+        if not re.search(r'val', folder):
+        # if not re.search(r'val|train|sample|test', folder):
             continue
         afl = ArgoverseForecastingLoader(os.path.join(DATA_DIR, folder))
         for name in tqdm(afl.seq_list):

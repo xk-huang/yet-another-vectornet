@@ -68,10 +68,13 @@ def fill_track_lost_in_middle(
     """
     curr_idx = 0
     filled_track = np.empty((0, track_array.shape[1]))
-    for timestamp in seq_timestamps:
-        filled_track = np.vstack((filled_track, track_array[curr_idx]))
-        if timestamp in track_array[:, raw_data_format["TIMESTAMP"]]:
-            curr_idx += 1
+    try:
+        for timestamp in seq_timestamps:
+            filled_track = np.vstack((filled_track, track_array[curr_idx]))
+            if timestamp in track_array[:, raw_data_format["TIMESTAMP"]]:
+                curr_idx += 1
+    except:
+        from pdb import set_trace; set_trace()
     return filled_track
 
 
@@ -129,20 +132,26 @@ def get_nearby_moving_obj_feature_ls(agent_df, traj_df, obs_len, seq_ts, norm_ce
         if len(remain_df) < EXIST_THRESHOLD or get_is_track_stationary(remain_df):
             continue
 
-        xys = None
-        if len(remain_df) < obs_len:
-            paded_nd = pad_track(remain_df, seq_ts, obs_len, RAW_DATA_FORMAT)
-            xys = np.array(paded_nd[:, 3:5])
-        else:
-            xys = remain_df[['X', 'Y']].values
-        p1 = xys[obs_len-1]
+        xys, ts = None, None
+        # if len(remain_df) < obs_len:
+        #     paded_nd = pad_track(remain_df, seq_ts, obs_len, RAW_DATA_FORMAT)
+        #     xys = np.array(paded_nd[:, 3:5], dtype=np.float64)
+        #     ts = np.array(paded_nd[:, 0], dtype=np.float64)  # FIXME: fix bug: not consider padding time_seq
+        # else:
+        xys = remain_df[['X', 'Y']].values
+        ts = remain_df["TIMESTAMP"].values
+
+        p1 = xys[-1]
         if np.linalg.norm(p0 - p1) > OBJ_RADIUS:
             continue
 
         xys -= norm_center  # normalize to last observed timestamp point of agent
         xys = np.hstack((xys[:-1], xys[1:]))
-        ts = remain_df["TIMESTAMP"].values
+        
         ts = (ts[:-1] + ts[1:]) / 2
+        # if not xys.shape[0] == ts.shape[0]:
+        #     from pdb import set_trace;set_trace()
+
 
         obj_feature_ls.append(
             [xys, remain_df['OBJECT_TYPE'].iloc[0], ts, track_id])
