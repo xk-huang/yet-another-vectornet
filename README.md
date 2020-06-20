@@ -6,12 +6,13 @@ Still under construction:
 - [x] finish the hierarchical GNN
 - [x] overfit the tiny sample dataset
 - [x] batchify the data and compute subgraph in parallel
-- [ ] evaluate results on DE / ADE metrics
-- [ ] add uni-test for each modules
+- [X] evaluate results on DE / ADE metrics
 - [x] refine the feature preprocessor (how to encode the features)
 - [x] Check the correctness of hierarchical-GNN's implementation
-- [ ] More advanced trajectory predictor, generate diverse trajectories (MultiPath, or variational RNNs; current using MLP)
 - [x] run on the whole dataset (running)
+- [ ] add multi-GPU training (currently too slow, 2h an epoch)
+- [ ] add uni-test for each modules
+- [ ] More advanced trajectory predictor, generate diverse trajectories (MultiPath, or variational RNNs; current using MLP)
 
 ## Environment
 Install the packages mentioned in requirements.txt
