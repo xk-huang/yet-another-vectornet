@@ -39,8 +39,10 @@ class SubGraph(nn.Module):
                 x = layer(x, edge_index)
         sub_data.x = x
         out_data = max_pool(sub_data.cluster, sub_data)
-        assert out_data.x.shape[0] % sub_data.time_step_len[0] == 0
-
+        # try:
+        assert out_data.x.shape[0] % int(sub_data.time_step_len[0]) == 0
+        # except:
+            # from pdb import set_trace; set_trace()
         out_data.x = out_data.x / out_data.x.norm(dim=0)
         return out_data
 

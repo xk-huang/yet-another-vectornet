@@ -126,11 +126,9 @@ class GraphDataset(InMemoryDataset):
                 y=torch.from_numpy(tup[1]),
                 cluster=torch.from_numpy(tup[2]),
                 edge_index=torch.from_numpy(tup[3]),
-                valid_len=valid_len_ls[ind],
-                time_step_len=padd_to_index + 1
+                valid_len=torch.tensor([valid_len_ls[ind]]),
+                time_step_len=torch.tensor([padd_to_index + 1])
             )
-            from pdb import set_trace
-            # set_trace()
             g_ls.append(g_data)
         data, slices = self.collate(g_ls)
         torch.save((data, slices), self.processed_paths[0])
