@@ -16,13 +16,13 @@ def get_eval_metric_results(model, data_loader, device, out_channels, max_n_gues
     seq_id = 0
     model.eval()
     with torch.no_grad():
-        for sample_id, data in enumerate(data_loader):
+        for data in data_loader:
             data = data.to(device)
             gt = data.y.view(-1, out_channels).to(device)
             out = model(data)
             for i in range(gt.size(0)):
-                pred_y = out[i].numpy().reshape((-1, 2)).cumsum(axis=0)
-                y = gt[i].numpy().reshape((-1, 2)).cumsum(axis=0)
+                pred_y = out[i].view((-1, 2)).cumsum(axis=0).cpu().numpy()
+                y = gt[i].view((-1, 2)).cumsum(axis=0).cpu().numpy()
                 forecasted_trajectories[seq_id] = [pred_y]
                 gt_trajectories[seq_id] = y
                 seq_id += 1
