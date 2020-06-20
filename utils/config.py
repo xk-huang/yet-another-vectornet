@@ -19,9 +19,8 @@ EXIST_THRESHOLD = (15)
 # index of the sorted velocity to look at, to call it as stationary
 STATIONARY_THRESHOLD = (13)
 color_dict = {"AGENT": "#d33e4c", "OTHERS": "#d3e8ef", "AV": "#007672"}
-lane_radius = 5
-obj_radius = 20
-root_dir = '../forecasting_sample/data/'
-SAVE_DIR = './input_data'
+LANE_RADIUS = 5
+OBJ_RADIUS = 20
+DATA_DIR = './data'
 OBS_LEN = 20
-DATASET_NAME = 'SAMPLE_DATASET.dataset'
+INTERMEDIATE_DATA_DIR = './interm_data'

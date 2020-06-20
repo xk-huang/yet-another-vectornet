@@ -6,12 +6,13 @@ Still under construction:
 - [x] finish the hierarchical GNN
 - [x] overfit the tiny sample dataset
 - [x] batchify the data and compute subgraph in parallel
-- [ ] evaluate results on DE / ADE metrics
-- [ ] add uni-test for each modules
+- [X] evaluate results on DE / ADE metrics
 - [x] refine the feature preprocessor (how to encode the features)
 - [x] Check the correctness of hierarchical-GNN's implementation
+- [x] run on the whole dataset (running)
+- [ ] add multi-GPU training (currently too slow, 2h an epoch)
+- [ ] add uni-test for each modules
 - [ ] More advanced trajectory predictor, generate diverse trajectories (MultiPath, or variational RNNs; current using MLP)
-- [ ] run on the whole dataset
 
 ## Environment
 Install the packages mentioned in requirements.txt
@@ -28,13 +29,32 @@ pip install -r requirements.txt
 
 ## Usage
 
-1) feature preprocessing (compute_feature_module.py)
+(Remember to run `find . -name "*.DS_Store" -type f -delete` if you're using MacOS)
+
+0) Install [Argoverse-api](https://github.com/argoai/argoverse-api/tree/master/argoverse). Download `HD-maps` in argoverse-api as instructed.
+
+1) put all data (folders named `train/val/test` or a single folder `sample`) in `data` folder.
+
+    An example folder structure:
+    ```
+    data - train - *.csv
+         \        \ ...
+          \
+           \- val - *.csv
+            \       \ ...
+             \
+              \- test - *.csv
+                       \ ...
+    ```
+2) Modify the config file `utils/config.py`. Use the proper env paths.
+
+3) Feature preprocessing, save intermediate data input features (compute_feature_module.py)
 ```
 $ python compute_feature_module.py
 ```
 Use (200, 200) size for a single sequence as the paper told.
 
-2) train the model (`train.py`; overfit a tiny dataset, and use `GraphDataset` in `dataset.py` to batchify the data)
+4) Train the model (`train.py`; overfit a tiny dataset, and use `GraphDataset` in `dataset.py` to batchify the data)
 ```
 $ python train.py
 ```

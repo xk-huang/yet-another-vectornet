@@ -5,3 +5,5 @@
 .DS_Store
 /processed
 /raw
+/data
+/interm_data

@@ -49,8 +49,8 @@ class HGNN(nn.Module):
             data (Data): [x, y, cluster, edge_index, valid_len]
 
         """
-        time_step_len = data.time_step_len[0]
-        valid_lens = torch.tensor(data.valid_len)
+        time_step_len = int(data.time_step_len[0])
+        valid_lens = data.valid_len
         sub_graph_out = self.subgraph(data)
         x = sub_graph_out.x.view(-1, time_step_len, self.polyline_vec_shape)
         out = self.self_atten_layer(x, valid_lens)
