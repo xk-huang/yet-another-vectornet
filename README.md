@@ -10,9 +10,20 @@ Still under construction:
 - [x] refine the feature preprocessor (how to encode the features)
 - [x] Check the correctness of hierarchical-GNN's implementation
 - [x] run on the whole dataset (running)
-- [ ] add multi-GPU training (currently too slow, 2h an epoch)
+- [x] add multi-GPU training (currently too slow, 2h an epoch)
 - [ ] add uni-test for each modules
 - [ ] More advanced trajectory predictor, generate diverse trajectories (MultiPath, or variational RNNs; current using MLP)
+
+---
+
+## Table of Contents
+
+- [Environment](#Environment)
+- [Usage](#Usage)
+- [Results on val/test](#Results-on-val/test)
+- [Result and visualization for overfitting tiny dataset](#Result-and-visualization-for-overfitting-tiny-dataset)
+
+---
 
 ## Environment
 Install the packages mentioned in requirements.txt
@@ -21,11 +32,11 @@ pip install -r requirements.txt
 ```
 
 > torch==1.4.0, 
-> argoverse-api, 
-> numpy==1.18.1, 
-> pandas==1.0.0, 
-> matplotlib==3.1.1, 
-> torch-geometric==1.5.0
+argoverse-api, 
+numpy==1.18.1, 
+pandas==1.0.0, 
+matplotlib==3.1.1, 
+torch-geometric==1.5.0
 
 ## Usage
 
@@ -58,6 +69,16 @@ Use (200, 200) size for a single sequence as the paper told.
 ```
 $ python train.py
 ```
+
+---
+
+## Results on val/test
+
+### Result on val
+
+### Result on test
+
+---
 
 ## Result and visualization for overfitting tiny dataset
 

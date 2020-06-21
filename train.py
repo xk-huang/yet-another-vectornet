@@ -19,15 +19,17 @@ from dataset import GraphDataset
 from torch_geometric.data import DataLoader
 from utils.eval import get_eval_metric_results
 from tqdm import tqdm
-
+import torch_geometric.nn as nn
 
 # %%
 TRAIN_DIR = os.path.join('interm_data', 'train_intermediate')
 VAL_DIR = os.path.join('interm_data', 'val_intermediate')
+gpus = [2, 3]
+torch.cuda.set_device(f'cuda:{gpus[0]}')
 SEED = 13
 epochs = 25
-device = torch.device('cuda:3' if torch.cuda.is_available() else 'cpu')
-batch_size = 256 * 8 * 2
+device = torch.device(f'cuda:{gpus[0]}' if torch.cuda.is_available() else 'cpu')
+batch_size = 4096 * len(gpus)
 decay_lr_factor = 0.3
 decay_lr_every = 5
 lr = 0.001
@@ -66,6 +68,7 @@ def load_checkpoint(checkpoint_path, model, optimizer):
     optimizer.load_state_dict(state['optimizer'])
     print('model loaded from %s' % checkpoint_path)
     return checkpoint_path['end_epoch']
+
 #%%
 if __name__ == "__main__":
     np.random.seed(SEED)
@@ -75,17 +78,19 @@ if __name__ == "__main__":
     train_data = GraphDataset(TRAIN_DIR).shuffle()
     val_data = GraphDataset(VAL_DIR)
     if small_dataset:
-        train_loader = DataLoader(train_data[:1000], batch_size=batch_size)
+        train_loader = DataLoader(train_data[:1000], batch_size=batch_size, shuffle=True)
         val_loader = DataLoader(val_data[:200], batch_size=batch_size)
     else:
-        train_loader = DataLoader(train_data, batch_size=batch_size)
+        train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
         val_loader = DataLoader(val_data, batch_size=batch_size)
 
     model = HGNN(in_channels, out_channels).to(device)
+    model = nn.DataParallel(model, device_ids=gpus, output_device=gpus[0])
+
     optimizer = optim.Adam(model.parameters(), lr=lr)
     scheduler = optim.lr_scheduler.StepLR(
         optimizer, step_size=decay_lr_every, gamma=decay_lr_factor)
-    model = model.to(device=device)
+    # model = model.to(device=device)
 
     # overfit the small dataset
     model.train()
@@ -95,8 +100,8 @@ if __name__ == "__main__":
         if epoch < end_epoch:
             continue
         for data in train_loader:
-            data = data.to(device)
-            y = data.y.view(-1, out_channels).to(device)
+            data = data.to(device, non_blocking=True)
+            y = data.y.view(-1, out_channels)
             optimizer.zero_grad()
             out = model(data)
             loss = F.mse_loss(out, y)
