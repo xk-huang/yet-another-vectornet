@@ -100,7 +100,7 @@ if __name__ == "__main__":
         if epoch < end_epoch:
             continue
         for data in train_loader:
-            data = data.to(device, non_blocking=True)
+            data = data.to(device)
             y = data.y.view(-1, out_channels)
             optimizer.zero_grad()
             out = model(data)
