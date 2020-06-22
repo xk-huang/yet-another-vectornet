@@ -29,7 +29,7 @@ branch `master` is sync with branch `large-scale`; branch `overfit-small` is arc
 
 ## Environment
 
-Multi-GPU training on Windows Serer 2016, CUDA version 10.1,  2 Titan Xp GPUs.
+Multi-GPU training on Windows Serer 2016; CUDA version 10.1; 2 Titan Xp GPUs.
 
 Install the packages mentioned in requirements.txt
 ```
@@ -49,7 +49,7 @@ torch-geometric==1.5.0
 
 0) Install [Argoverse-api](https://github.com/argoai/argoverse-api/tree/master/argoverse). Download `HD-maps` in argoverse-api as instructed.
 
-1) download [my prepared dataset objects on Google Drive](https://drive.google.com/file/d/1A8c3PIAaV3OeyHg8lLUg_1AzDky1jEdI/view?usp=sharing) directly and unzip it in path `.`, the go to step 2)
+1) download [the prepared dataset objects on Google Drive](https://drive.google.com/file/d/1A8c3PIAaV3OeyHg8lLUg_1AzDky1jEdI/view?usp=sharing) directly and unzip it in path `.`, and skip step 3.
 
     or prepared the dataset (batchify ...) from raw *.csv. 
    
@@ -66,9 +66,7 @@ torch-geometric==1.5.0
               \- test - *.csv
                        \ ...
     ```
-2) Modify the config file `utils/config.py`. Use the proper env paths and arguments
-
-    
+2) Modify the config file `utils/config.py`. Use the proper env paths and arguments.
 
 3) Feature preprocessing, save intermediate data input features (compute_feature_module.py)
     ```
