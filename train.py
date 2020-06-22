@@ -23,6 +23,7 @@ import torch_geometric.nn as nn
 import time
 
 # %%
+# train related
 TRAIN_DIR = os.path.join('interm_data', 'train_intermediate')
 VAL_DIR = os.path.join('interm_data', 'val_intermediate')
 gpus = [2, 3]
@@ -72,11 +73,12 @@ def load_checkpoint(checkpoint_path, model, optimizer):
 
 #%%
 if __name__ == "__main__":
+    # training envs
     np.random.seed(SEED)
     torch.manual_seed(SEED)
     device = torch.device(f'cuda:{gpus[0]}' if torch.cuda.is_available() else 'cpu')
-    # hyper parameters
 
+    # prepare dara
     train_data = GraphDataset(TRAIN_DIR).shuffle()
     val_data = GraphDataset(VAL_DIR)
     if small_dataset:
@@ -95,10 +97,11 @@ if __name__ == "__main__":
         optimizer, step_size=decay_lr_every, gamma=decay_lr_factor)
 
 
-    # overfit the small dataset
+    # training loop
     model.train()
     for epoch in range(epochs):
         acc_loss = .0
+        num_samples = 0
         start_tic = time.time()
         for data in train_loader:
             if epoch < end_epoch: break
@@ -108,22 +111,25 @@ if __name__ == "__main__":
             loss = F.mse_loss(out, y)
             loss.backward()
             acc_loss += batch_size * loss.item()
+            num_samples += y.shape[0]
             optimizer.step()
-
             global_step += 1
             if (global_step + 1) % show_every == 0:
-                print( f"loss at epoch {epoch} step {global_step}: {loss.item():3f}, lr{optimizer.state_dict()['param_groups'][0]['lr']: .6f}")
-       
+                print( f"loss at epoch {epoch} step {global_step}:{loss.item():3f}, lr:{optimizer.state_dict()['param_groups'][0]['lr']: .6f}, time:{time.time() - start_tic: 4f}sec")
+        scheduler.step()
         print(
-            f"loss at epoch {epoch}: {acc_loss / len(train_loader):.3f}, lr{optimizer.state_dict()['param_groups'][0]['lr']: .6f}, time{time.time() - start_tic: 4f}s")
+            f"loss at epoch {epoch}:{acc_loss / num_samples:.3f}, lr:{optimizer.state_dict()['param_groups'][0]['lr']: .6f}, time:{time.time() - start_tic: 4f}sec")
+        
         if (epoch+1) % val_every == 0 and (not epoch < end_epoch):
+            print("eval as epoch:{epoch}")
             metrics = get_eval_metric_results(model, val_loader, device, out_channels, max_n_guesses, horizon, miss_threshold)
             curr_minade = metrics["minADE"]
+            print(f"minADE:{metrics['minADE']:3f}, minFDE:{metrics['minFDE']:3f}, MissRate:{metrics['MR']:3f}")
+
             if curr_minade < best_minade:
                 best_minade = curr_minade
                 save_checkpoint(save_dir, model, optimizer, epoch, best_minade, date)
-        scheduler.step()
-
+                
     # eval result on the identity dataset
     metrics = get_eval_metric_results(model, val_loader, device, out_channels, max_n_guesses, horizon, miss_threshold)
     curr_minade = metrics["minADE"]

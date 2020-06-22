@@ -17,7 +17,7 @@ def get_eval_metric_results(model, data_loader, device, out_channels, max_n_gues
     model.eval()
     with torch.no_grad():
         for data in data_loader:
-            y = torch.cat([i.y for i in data], 0).view(-1, out_channels).to(device)
+            gt = torch.cat([i.y for i in data], 0).view(-1, out_channels).to(device)
             out = model(data)
             for i in range(gt.size(0)):
                 pred_y = out[i].view((-1, 2)).cumsum(axis=0).cpu().numpy()
@@ -28,7 +28,6 @@ def get_eval_metric_results(model, data_loader, device, out_channels, max_n_gues
         metric_results = get_displacement_errors_and_miss_rate(
             forecasted_trajectories, gt_trajectories, max_n_guesses, horizon, miss_threshold
         )
-        pprint(metric_results)
         return metric_results
 
 def eval_loss():
