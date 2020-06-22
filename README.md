@@ -14,18 +14,23 @@ Still under construction:
 - [ ] add uni-test for each modules
 - [ ] More advanced trajectory predictor, generate diverse trajectories (MultiPath, or variational RNNs; current using MLP)
 
+branch `master` is sync with branch `large-scale`; branch `overfit-small` is archived
+
 ---
 
 ## Table of Contents
 
 - [Environment](#Environment)
 - [Usage](#Usage)
-- [Results on val/test](#Results-on-val/test)
+- [Results on val and test](#Results-on-val-and-test)
 - [Result and visualization for overfitting tiny dataset](#Result-and-visualization-for-overfitting-tiny-dataset)
 
 ---
 
 ## Environment
+
+Multi-GPU training on Windows Serer 2016, CUDA version 10.1,  2 Titan Xp GPUs.
+
 Install the packages mentioned in requirements.txt
 ```
 pip install -r requirements.txt
@@ -44,7 +49,11 @@ torch-geometric==1.5.0
 
 0) Install [Argoverse-api](https://github.com/argoai/argoverse-api/tree/master/argoverse). Download `HD-maps` in argoverse-api as instructed.
 
-1) put all data (folders named `train/val/test` or a single folder `sample`) in `data` folder.
+1) download [my prepared dataset objects on Google Drive](https://drive.google.com/file/d/1A8c3PIAaV3OeyHg8lLUg_1AzDky1jEdI/view?usp=sharing) directly and unzip it in path `.`, the go to step 2)
+
+    or prepared the dataset (batchify ...) from raw *.csv. 
+   
+    put all data (folders named `train/val/test` or a single folder `sample`) in `data` folder.
 
     An example folder structure:
     ```
@@ -57,22 +66,24 @@ torch-geometric==1.5.0
               \- test - *.csv
                        \ ...
     ```
-2) Modify the config file `utils/config.py`. Use the proper env paths.
+2) Modify the config file `utils/config.py`. Use the proper env paths and arguments
+
+    
 
 3) Feature preprocessing, save intermediate data input features (compute_feature_module.py)
-```
-$ python compute_feature_module.py
-```
-Use (200, 200) size for a single sequence as the paper told.
+    ```
+    $ python compute_feature_module.py
+    ```
+    Use (200, 200) size for a single sequence as the paper told.
 
-4) Train the model (`train.py`; overfit a tiny dataset, and use `GraphDataset` in `dataset.py` to batchify the data)
-```
-$ python train.py
-```
+4) Train the model (`train.py`; overfit a tiny dataset by setting `small_dataset = True`, and use `GraphDataset` in `dataset.py` to batchify the data)
+    ```
+    $ python train.py
+    ```
 
 ---
 
-## Results on val/test
+## Results on val and test
 
 ### Result on val
 
