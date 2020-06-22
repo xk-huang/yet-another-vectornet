@@ -17,8 +17,7 @@ def get_eval_metric_results(model, data_loader, device, out_channels, max_n_gues
     model.eval()
     with torch.no_grad():
         for data in data_loader:
-            data = data.to(device)
-            gt = data.y.view(-1, out_channels).to(device)
+            y = torch.cat([i.y for i in data], 0).view(-1, out_channels).to(device)
             out = model(data)
             for i in range(gt.size(0)):
                 pred_y = out[i].view((-1, 2)).cumsum(axis=0).cpu().numpy()
@@ -31,3 +30,25 @@ def get_eval_metric_results(model, data_loader, device, out_channels, max_n_gues
         )
         pprint(metric_results)
         return metric_results
+
+def eval_loss():
+    raise NotImplementedError("not finished yet")
+    model.eval()
+    from utils.viz_utils import show_pred_and_gt
+    with torch.no_grad():
+        accum_loss = .0
+        for sample_id, data in enumerate(train_loader):
+            data = data.to(device)
+            gt = data.y.view(-1, out_channels).to(device)
+            optimizer.zero_grad()
+            out = model(data)
+            loss = F.mse_loss(out, gt)
+            accum_loss += batch_size * loss.item()
+            print(f"loss for sample {sample_id}: {loss.item():.3f}")
+
+            for i in range(gt.size(0)):
+                pred_y = out[i].numpy().reshape((-1, 2)).cumsum(axis=0)
+                y = gt[i].numpy().reshape((-1, 2)).cumsum(axis=0)
+                show_pred_and_gt(pred_y, y)
+                plt.show()
+        print(f"eval overall loss: {accum_loss / len(ds):.3f}")
