@@ -94,7 +94,7 @@ For pre-processed data, pre-trained model, and results `*.h5` file: [Google Driv
 
 ## Results on val and test
 
-Some predicting results were uploaded to the Argoverse contest, check the board via the [url](https://evalai.cloudcv.org/web/challenges/challenge-page/454/leaderboard/)
+Some predicting results were uploaded to the Argoverse contest, check the board [HERE](https://evalai.cloudcv.org/web/challenges/challenge-page/454/leaderboard/)
 
 Submission ID of the repo: @xkhuang
 
