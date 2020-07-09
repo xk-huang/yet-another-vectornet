@@ -2,6 +2,8 @@
 
 Paper: [VectorNet: Encoding HD Maps and Agent Dynamics from Vectorized Representation](https://arxiv.org/abs/2005.04259)
 
+Please let me know if there are any mistakes or questions (xiaokehuang [at] foxmail [dot] com), Thank you!
+
 Still under construction:
 
 - [x] finish the feature preprocessor
@@ -13,14 +15,14 @@ Still under construction:
 - [x] Check the correctness of hierarchical-GNN's implementation
 - [x] run on the whole dataset (running)
 - [x] add multi-GPU training (currently too slow, 2h an epoch)
-- [ ] add uni-test for each modules
+- [ ] add uni-test for each module
 - [ ] More advanced trajectory predictor, generate diverse trajectories (MultiPath, or variational RNNs; current using MLP)
 - [ ] add node feature completing module
 
 
-Inplement a Vectornet: hierarchical GNN encoder (no feature completing) + MLP predictor, without node feature completing.
+Implement a Vectornet: hierarchical GNN encoder (no feature completing) + MLP predictor, without node feature completing.
 
-The performance on test is 3.255 on  minADE (K=1) v.s that in paper of 1.81.
+The performance on test is 3.255 on  minADE (K=1) v.s that in the paper of 1.81.
 
 branch `master` is sync with branch `large-scale`; branch `overfit-small` is archived.
 
@@ -120,7 +122,7 @@ Submission ID of the repo: @xkhuang
 
 Sample results are shown below:
 * red lines are agent input and ground truth output
-* blue points are predicted feature tarjectory
+* blue points are predicted feature trajectory
 * light blue lanes are other moving objects
 * grey lines are lanes
 
