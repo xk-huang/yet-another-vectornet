@@ -70,7 +70,9 @@ class GraphDataset(InMemoryDataset):
 
         def get_data_path_ls(dir_):
             return [os.path.join(dir_, data_path) for data_path in os.listdir(dir_)]
-        data_path_ls = get_data_path_ls(self.root)
+        
+        # make sure deterministic results
+        data_path_ls = sorted(get_data_path_ls(self.root))
 
         valid_len_ls = []
         valid_len_ls = []

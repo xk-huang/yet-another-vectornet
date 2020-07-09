@@ -31,6 +31,7 @@ def compute_feature_for_one_seq(traj_df: pd.DataFrame, am: ArgoverseMap, obs_len
             list of list of (doubled_track, object_type, timestamp, track_id)
         lane_feature_ls:
             list of list of lane a segment feature, formatted in [left_lane, right_lane, is_traffic_control, is_intersection, lane_id]
+        norm_center np.ndarray: (2, )
     """
     # normalize timestamps
     traj_df['TIMESTAMP'] -= np.min(traj_df['TIMESTAMP'].values)
@@ -54,8 +55,9 @@ def compute_feature_for_one_seq(traj_df: pd.DataFrame, am: ArgoverseMap, obs_len
             raise ValueError(f"cannot find 'agent' object type")
 
     # prune points after "obs_len" timestamp
-    traj_df = traj_df[traj_df['TIMESTAMP'] <
-                      agent_df['TIMESTAMP'].values[obs_len]]
+    # [FIXED] test set length is only `obs_len`
+    traj_df = traj_df[traj_df['TIMESTAMP'] <=
+                      agent_df['TIMESTAMP'].values[obs_len-1]]
 
     assert (np.unique(traj_df["TIMESTAMP"].values).shape[0]
             == obs_len), "Obs len mismatch"
@@ -94,14 +96,20 @@ def compute_feature_for_one_seq(traj_df: pd.DataFrame, am: ArgoverseMap, obs_len
                  'x', color='blue', markersize=4)
         plt.show()
 
-    return [agent_feature, obj_feature_ls, lane_feature_ls]
+    return [agent_feature, obj_feature_ls, lane_feature_ls, norm_center]
 
 
 def trans_gt_offset_format(gt):
     """
     >Our predicted trajectories are parameterized as per-stepcoordinate offsets, starting from the last observed location.We rotate the coordinate system based on the heading of the target vehicle at the last observed location.
+    
     """
-    assert gt.shape == (30, 2), f"{gt.shape} is wrong"
+    assert gt.shape == (30, 2) or gt.shape == (0, 2), f"{gt.shape} is wrong"
+
+    # for test, no gt, just return a (0, 2) ndarray
+    if gt.shape == (0, 2):
+        return gt
+
     offset_gt = np.vstack((gt[0], gt[1:] - gt[:-1]))
     # import pdb
     # pdb.set_trace()
