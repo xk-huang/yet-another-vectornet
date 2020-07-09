@@ -15,27 +15,36 @@ import os
 from utils.config import DATA_DIR, LANE_RADIUS, OBJ_RADIUS, OBS_LEN, INTERMEDIATE_DATA_DIR
 from tqdm import tqdm
 import re
+import pickle
 # %matplotlib inline
 
 
 if __name__ == "__main__":
     am = ArgoverseMap()
     for folder in os.listdir(DATA_DIR):
-        if not re.search(r'val', folder):
+
         # if not re.search(r'val|train|sample|test', folder):
+        # FIXME: modify the target folder by hand ('val|train|sample|test')
+        if not re.search(r'test', folder):
             continue
         afl = ArgoverseForecastingLoader(os.path.join(DATA_DIR, folder))
+        norm_center_dict = {}
         for name in tqdm(afl.seq_list):
             afl_ = afl.get(name)
             path, name = os.path.split(name)
             name, ext = os.path.splitext(name)
 
-            agent_feature, obj_feature_ls, lane_feature_ls = compute_feature_for_one_seq(
+            agent_feature, obj_feature_ls, lane_feature_ls, norm_center = compute_feature_for_one_seq(
                 afl_.seq_df, am, OBS_LEN, LANE_RADIUS, OBJ_RADIUS, viz=False, mode='nearby')
             df = encoding_features(
                 agent_feature, obj_feature_ls, lane_feature_ls)
             save_features(df, name, os.path.join(
                 INTERMEDIATE_DATA_DIR, f"{folder}_intermediate"))
+
+            norm_center_dict[name] = norm_center
+        
+        with open(os.path.join(INTERMEDIATE_DATA_DIR, f"{folder}-norm_center_dict.pkl"), 'wb') as f:
+            pickle.dump(norm_center_dict, f, pickle.HIGHEST_PROTOCOL)
             # print(pd.DataFrame(df['POLYLINE_FEATURES'].values[0]).describe())
 
 
