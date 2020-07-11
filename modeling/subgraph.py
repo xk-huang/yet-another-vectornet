@@ -59,9 +59,10 @@ class GraphLayerProp(MessagePassing):
     Message Passing mechanism for infomation aggregation
     """
 
-    def __init__(self, in_channels, hidden_unit=64):
+    def __init__(self, in_channels, hidden_unit=64, verbose=False):
         super(GraphLayerProp, self).__init__(
             aggr='max')  # MaxPooling aggragation
+        self.verbose = verbose
         self.mlp = nn.Sequential(
             nn.Linear(in_channels, hidden_unit),
             nn.LayerNorm(hidden_unit),
@@ -70,11 +71,30 @@ class GraphLayerProp(MessagePassing):
         )
 
     def forward(self, x, edge_index):
+        if self.verbose:
+            print(f'x before mlp: {x}')
         x = self.mlp(x)
+        if self.verbose:
+            print(f"x after mlp: {x}")
         return self.propagate(edge_index, size=(x.size(0), x.size(0)), x=x)
 
     def message(self, x_j):
         return x_j
 
     def update(self, aggr_out, x):
+        if self.verbose:
+            print(f"x after mlp: {x}")
+            print(f"aggr_out: {aggr_out}")
         return torch.cat([x, aggr_out], dim=1)
+
+
+if __name__ == "__main__":
+    data = Data(x=torch.tensor([[1.0], [7.0]]), edge_index=torch.tensor([[0, 1], [1, 0]]))
+    print(data)
+    layer = GraphLayerProp(1, 1, True)
+    for k, v in layer.state_dict().items():
+        if k.endswith('weight'):
+            v[:] = torch.tensor([[1.0]])
+        elif k.endswith('bias'):
+            v[:] = torch.tensor([1.0])
+    y = layer(data.x, data.edge_index)
