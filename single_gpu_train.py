@@ -82,10 +82,10 @@ if __name__ == "__main__":
     train_data = GraphDataset(TRAIN_DIR).shuffle()
     val_data = GraphDataset(VAL_DIR)
     if small_dataset:
-        train_loader = DataLoader(train_data[:1000], batch_size=batch_size)
+        train_loader = DataLoader(train_data[:1000], batch_size=batch_size, shuffle=True)
         val_loader = DataLoader(val_data[:200], batch_size=batch_size)
     else:
-        train_loader = DataLoader(train_data, batch_size=batch_size)
+        train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
         val_loader = DataLoader(val_data, batch_size=batch_size)
 
     model = HGNN(in_channels, out_channels).to(device)
