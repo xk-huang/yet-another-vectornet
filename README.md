@@ -20,7 +20,7 @@ Still under construction:
 
 Inplement a Vectornet: hierarchical GNN encoder (no feature completing) + MLP predictor, without node feature completing.
 
-The performance on test is 3.255 on  minADE (K=1) v.s that in paper of 1.81.
+~~The performance on test is 3.255 on  minADE (K=1) v.s that in paper of 1.81.~~ (bugs found in `GraphDataset`: the former implementation contained self-loops connections in graph data, which was wrong; now the model is still trainning...)
 
 branch `master` is sync with branch `large-scale`; branch `overfit-small` is archived.
 
