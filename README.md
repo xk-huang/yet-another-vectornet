@@ -2,8 +2,6 @@
 
 Paper: [VectorNet: Encoding HD Maps and Agent Dynamics from Vectorized Representation](https://arxiv.org/abs/2005.04259)
 
-Please let me know if there are any mistakes or questions (xiaokehuang [at] foxmail [dot] com), Thank you!
-
 Still under construction:
 
 - [x] finish the feature preprocessor
@@ -15,14 +13,14 @@ Still under construction:
 - [x] Check the correctness of hierarchical-GNN's implementation
 - [x] run on the whole dataset (running)
 - [x] add multi-GPU training (currently too slow, 2h an epoch)
-- [ ] add uni-test for each module
+- [ ] add uni-test for each modules
 - [ ] More advanced trajectory predictor, generate diverse trajectories (MultiPath, or variational RNNs; current using MLP)
 - [ ] add node feature completing module
 
 
-Implement a Vectornet: hierarchical GNN encoder (no feature completing) + MLP predictor, without node feature completing.
+Inplement a Vectornet: hierarchical GNN encoder (no feature completing) + MLP predictor, without node feature completing.
 
-The performance on test is 3.255 on  minADE (K=1) v.s that in the paper of 1.81.
+~~The performance on test is 3.255 on  minADE (K=1) v.s that in paper of 1.81.~~ (bug found in `GraphDataset`: the former implementation contained *self-loops connection* in graph data, which was wrong; and the preprocessed `dataset.pt` was also wrong; now the model is still trainning...)
 
 branch `master` is sync with branch `large-scale`; branch `overfit-small` is archived.
 
@@ -96,7 +94,7 @@ For pre-processed data, pre-trained model, and results `*.h5` file: [Google Driv
 
 ## Results on val and test
 
-Some predicting results were uploaded to the Argoverse contest, check the board [HERE](https://evalai.cloudcv.org/web/challenges/challenge-page/454/leaderboard/)
+Some predicting results were uploaded to the Argoverse contest, check the board via the [url](https://evalai.cloudcv.org/web/challenges/challenge-page/454/leaderboard/)
 
 Submission ID of the repo: @xkhuang
 
@@ -122,7 +120,7 @@ Submission ID of the repo: @xkhuang
 
 Sample results are shown below:
 * red lines are agent input and ground truth output
-* blue points are predicted feature trajectory
+* blue points are predicted feature tarjectory
 * light blue lanes are other moving objects
 * grey lines are lanes
 

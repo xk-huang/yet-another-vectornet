@@ -29,7 +29,7 @@ VAL_DIR = os.path.join('interm_data', 'val_intermediate')
 TEST_DIR = os.path.join('interm_data', 'test_intermediate')
 SEED = 13
 epochs = 50
-device = torch.device('cuda:3' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:2' if torch.cuda.is_available() else 'cpu')
 batch_size = 4096
 decay_lr_factor = 0.3
 decay_lr_every = 10
@@ -43,7 +43,7 @@ save_dir = 'trained_params'
 best_minade = float('inf')
 date = f"200630.epochs{epochs}.lr_decay{decay_lr_factor}.decay_every{decay_lr_every}.lr{lr}"
 global_step = 0
-FILENAME = 'epoch_49.valminade_3.066.200630.epochs50.lr_decay0.3.decay_every10.lr0.001.xkhuang.pth'
+FILENAME = 'epoch_9.valminade_2.500.200707.epochs50.lr_decay0.3.decay_every15.lr0.0003.xkhuang.pth'
 checkpoint_dir = os.path.join('trained_params', FILENAME)
 # checkpoint_dir = None
 NORM_CENTERS_DICT_DIR = os.path.join('interm_data', 'test-norm_center_dict.pkl')
@@ -72,10 +72,10 @@ def save_checkpoint(checkpoint_dir, model, optimizer, end_epoch, val_minade, dat
     torch.save(state, checkpoint_path)
     print('model saved to %s' % checkpoint_path)
     
-def load_checkpoint(checkpoint_path, model, optimizer):
-    state = torch.load(checkpoint_path)
+def load_checkpoint(checkpoint_path, model):
+    state = torch.load(checkpoint_path, map_location='cpu')
     model.load_state_dict(state['state_dict'])
-    optimizer.load_state_dict(state['optimizer'])
+    # optimizer.load_state_dict(state['optimizer'])
     print('model loaded from %s' % checkpoint_path)
 
 
@@ -96,12 +96,13 @@ if __name__ == "__main__":
     test_data = GraphDataset(TEST_DIR)
     test_loader = DataLoader(test_data, batch_size=batch_size)
 
-    model = HGNN(in_channels, out_channels).to(device)
+    model = HGNN(in_channels, out_channels)
     optimizer = optim.Adam(model.parameters(), lr=lr)
     scheduler = optim.lr_scheduler.StepLR(
         optimizer, step_size=decay_lr_every, gamma=decay_lr_factor)
     if checkpoint_dir:
-        load_checkpoint(checkpoint_dir, model, optimizer)
+        load_checkpoint(checkpoint_dir, model)
+        model = model.to(device)
 
     norm_centers_dict = None
     with open(NORM_CENTERS_DICT_DIR, 'rb') as f:
