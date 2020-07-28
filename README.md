@@ -1,4 +1,4 @@
-# Reimplement :car:
+# Reimplement VectorNet :car:
 
 Paper: [VectorNet: Encoding HD Maps and Agent Dynamics from Vectorized Representation](https://arxiv.org/abs/2005.04259)
 
@@ -21,6 +21,8 @@ Still under construction:
 Inplement a Vectornet: hierarchical GNN encoder (no feature completing) + MLP predictor, without node feature completing.
 
 ~~The performance on test is 3.255 on  minADE (K=1) v.s that in paper of 1.81.~~ (bug found in `GraphDataset`: the former implementation contained *self-loops connection* in graph data, which was wrong; and the preprocessed `dataset.pt` was also wrong; now the model is still trainning...)
+
+After I fix the bug about self-loops in `Graph.Data`, I re-train the network with the same setting but only to find the performance on the validation set remains the same for about 2.6 of ADE, which was so disappointing. Notice that I only use the context (social + lanes) with about 5-10 meters around each agent (not enough machine for me), so I tried to change the context radius to 100 meters in `config.py` file (in the paper it's 200 * 200 if my memory serves me right). Unfortunately, the machines in the lab are not accessible to me right now, so I couldn't train the network with these new settings. :cry:
 
 branch `master` is sync with branch `large-scale`; branch `overfit-small` is archived.
 
