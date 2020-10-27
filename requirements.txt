@@ -31,7 +31,7 @@ clyent==1.2.2
 colorama==0.4.3
 colour==0.1.5
 contextlib2==0.6.0.post1
-cryptography==2.8
+cryptography==3.2
 cycler==0.10.0
 Cython==0.29.14
 cytoolz==0.10.1
