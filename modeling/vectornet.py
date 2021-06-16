@@ -33,11 +33,11 @@ class HGNN(nn.Module):
     hierarchical GNN with trajectory prediction MLP
     """
 
-    def __init__(self, in_channels, out_channels, num_subgraph_layres=3, num_global_graph_layer=1, subgraph_width=64, global_graph_width=64, traj_pred_mlp_width=64):
+    def __init__(self, in_channels, out_channels, num_subgraph_layers=3, num_global_graph_layer=1, subgraph_width=64, global_graph_width=64, traj_pred_mlp_width=64):
         super(HGNN, self).__init__()
-        self.polyline_vec_shape = in_channels * (2 ** num_subgraph_layres)
+        self.polyline_vec_shape = in_channels * (2 ** num_subgraph_layers)
         self.subgraph = SubGraph(
-            in_channels, num_subgraph_layres, subgraph_width)
+            in_channels, num_subgraph_layers, subgraph_width)
         self.self_atten_layer = SelfAttentionLayer(
             self.polyline_vec_shape, global_graph_width, need_scale=False)
         self.traj_pred_mlp = TrajPredMLP(
